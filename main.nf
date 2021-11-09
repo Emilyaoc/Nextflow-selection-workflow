@@ -19,11 +19,11 @@ if(workflow.profile == "uppmax" && !params.project){
     exit 1, "Please provide a SNIC project number ( --project )!\n"
 }
 
-include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons' addParams(options:[:])
-include { PRANK                } from './modules/prank'                addParams(options:[:])
-include { PAML                 } from './modules/paml'                 addParams(options:[:])
-include { HYPHY                } from './modules/hyphy'                addParams(options:[:])
-include { JQ                   } from './modules/jq'                   addParams(options:params.modules['jq'])
+include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons'
+include { PRANK                } from './modules/prank'
+include { PAML                 } from './modules/paml'
+include { HYPHY                } from './modules/hyphy'
+include { JQ                   } from './modules/jq'
 
 // The main workflow
 workflow {
