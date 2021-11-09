@@ -17,8 +17,9 @@ process HYPHY {
     path "*.json", emit: json
 
     script:
+    def args = task.ext.args ?: ''
     """
-    hyphy $test --alignment $fasta --tree $tree
+    hyphy $args $test --alignment $fasta --tree $tree
     """
 
 }
