@@ -4,7 +4,7 @@ The workflows in this folder manage the execution of your analyses
 from beginning to end.
 
 ```
-workflow/
+Nextflow-selection-workflow/
  | - bin/                            Custom workflow scripts
  | - configs/                        Configuration files that govern workflow execution
  | - containers/                     Custom container definition files
@@ -26,23 +26,24 @@ There are two workflows which can be run.
 
 Workflow parameters can be provided in a custom configuration file.
 A [template](params.config.TEMPLATE) is available to copy in this directory.
-This can also be used to override workflow default settings. When
-modules are used, software specific parameters can be overridden by
-including a modules block with a tool specific block with the
-overriding parameters. For example:
+This can also be used to override workflow default settings.
+
+Some tools used in the workflow can also be configured to use
+alternative parameters such as `JQ`, `PRANK`, and `HYPHY`. Software
+specific parameters are supplied to scripts using the `ext.args`
+process directive. These are assigned in the file
+`configs/modules.config`. Software specific parameters can be
+overridden by updating the process selector configuration in a
+custom configuration file. For example:
 
 ```
 // Workflow parameters
-params {
-
-    <workflow parameters>
-    ...
-
-    modules {
-        'blastx' {
-            // Increase max target sequences from 1 to 5
-            args = '-max_target_seqs 5 -evalue 1e-10'
-        }
+...
+// Software specific parameters
+process {
+    withName: 'HYPHY' {
+        // Write diagnostic messages to log
+        ext.args = '-m'
     }
 }
 
