@@ -18,8 +18,9 @@ process JQ {
     path "*.tsv", emit: tsv
 
     script:
+    def args = task.ext.args ?: ''
     """
-    jq ${params.options.args} \\
+    jq $args \\
         -f ${jq_filter} \\
         $json > ${json.baseName}.tsv
     """

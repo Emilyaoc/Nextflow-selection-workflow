@@ -18,12 +18,14 @@ process PRANK {
 
     script:
     def prefix = sequences.baseName
+    def args   = task.ext.args  ?: ''
+    def args2  = task.ext.args2 ?: ''
     """
     prank -d=$sequences \\
         -t=$tree \\
         -o=${prefix} \\
-        -codon -once -F
-    prank -convert -f=paml -keep \\
+        $args
+    prank $args2 \\
         -d=${prefix}.best.fas \\
         -o=${prefix}
     """
