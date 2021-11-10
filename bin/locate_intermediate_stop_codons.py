@@ -19,8 +19,8 @@ import sys
 
 # Script adapted from https://www.biostars.org/p/296261/
 
-def remove_stop_codons(gene, record, tsv, codon_stop_array = ["TAG", "TGA", "TAA", "UGA", "UAA", "UAG"], codon_start_array = ["ATG","AUG"]):
-    # Check if seq starts with start-codon and ends with stop-codon
+def remove_stop_codons(gene, record, tsv, codon_stop_array = ["TAG","TGA","TAA"], codon_stop_array_end = ["TAG","NAG","TNG","TAN","TGA","NGA","TNA","TGN","TAA","NAA","TNA","TAN"], codon_start_array = ["ATG","NTG","ANG","ATN"]):
+    # Check if seq starts with start-codon and ends with stop-codon, or a similar codon with an N
     # Add codon to empty string unless it's a stop and then replace the sequence.
     # count stop codons
     tempRecordSeq = ""                                # Sequence without stop codons
@@ -30,7 +30,7 @@ def remove_stop_codons(gene, record, tsv, codon_stop_array = ["TAG", "TGA", "TAA
     seqstart = record.seq[0:0+3]
     seqend = record.seq[sequenceLength-3:sequenceLength]
 
-    if ( seqstart.upper() not in codon_start_array or seqend.upper() not in codon_stop_array ):
+    if ( seqstart.upper() not in codon_start_array or seqend.upper() not in codon_stop_array_end ):
         tsv.writerow([ gene, record.id, "NA","Missing" ])
     else:
         for index in range(0, sequenceLength, 3):
