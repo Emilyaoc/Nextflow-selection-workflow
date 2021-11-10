@@ -30,7 +30,7 @@ def remove_stop_codons(gene, record, tsv, codon_stop_array = ["TAG", "TGA", "TAA
     seqstart = record.seq[0:0+3]
     seqend = record.seq[sequenceLength-3:sequenceLength]
 
-    if ( seqstart not in codon_start_array or seqend not in codon_stop_array ):
+    if ( seqstart.upper() not in codon_start_array or seqend.upper() not in codon_stop_array ):
         tsv.writerow([ gene, record.id, "NA","Missing" ])
     else:
         for index in range(0, sequenceLength, 3):
