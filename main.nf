@@ -24,6 +24,7 @@ include { PRANK                } from './modules/prank'
 include { PAML                 } from './modules/paml'
 include { HYPHY                } from './modules/hyphy'
 include { JQ                   } from './modules/jq'
+include { CODONPHYML           } from './modules/codonphyml'
 
 // The main workflow
 workflow {
@@ -102,4 +103,7 @@ workflow SELECTION_ANALYSES {
         storeDir:"${params.results}/03_HyPhy_selection_analysis"
     )
 
+    CODONPHYML (
+        PRANK.out.paml_alignment
+    )
 }
