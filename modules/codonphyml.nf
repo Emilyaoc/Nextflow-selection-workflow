@@ -1,6 +1,6 @@
 process CODONPHYML {
 
-    container "codonphyml:1.0"
+    container "ghcr.io/emilyaoc/codonphyml:1.0"
 
     input:
     path alignment
