@@ -6,7 +6,8 @@ process CODONPHYML {
     path alignment
 
     output:
-    path "*", emit: out
+    path "*_codonphyml_stats.txt", emit: codonphyml_stats
+    path "*_codonphyml_tree.txt",  emit: codonphyml_tree
 
     script:
     def args   = task.ext.args   ?: ''
@@ -14,7 +15,6 @@ process CODONPHYML {
     """
     codonphyml \\
         -i $alignment \\
-        -o $prefix \\
         $args
     """
 
