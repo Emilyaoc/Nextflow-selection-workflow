@@ -73,19 +73,18 @@ workflow SELECTION_ANALYSES {
     main:
     // Phylogenetically-informed codon-based gene sequence alignment
     PRANK (
-        gene_sequences.combine(
-            Channel.value(
-                file(
-                    params.species_tree,
-                    checkIfExists: true
-                )
-            )
-        )
+        gene_sequences,
+        Channel.value( file( params.species_tree, checkIfExists: true ) )
     )
-
+    tree_ch = Channel.empty()
+    if( params.run_codonphyml ) {
+        CODONPHYML( PRANK.out.paml_alignment )
+        tree_ch = CODONPHYML.out.codonphyml_tree.collect()
+    }
     // Hyphy branch-site selection tests
     HYPHY (
-        PRANK.out.hyphy_alignment,
+        PRANK.out.fasta_alignment,
+        params.run_codonphyml ? tree_ch : Channel.value( file( params.species_tree, checkIfExists: true ) ),
         params.hyphy_test
     )
     // Hyphy JSON to TSV
@@ -103,7 +102,4 @@ workflow SELECTION_ANALYSES {
         storeDir:"${params.results}/03_HyPhy_selection_analysis"
     )
 
-    CODONPHYML (
-        PRANK.out.paml_alignment
-    )
 }
