@@ -10,11 +10,12 @@ process PRANK {
     }
 
     input:
-    tuple path( sequences ), path( tree )
+    path( sequences )
+    path( tree )
 
     output:
-    tuple path( "*.best.fas" ), path( tree ), emit: hyphy_alignment
-    path "*.phy"                            , emit: paml_alignment
+    path "*.best.fas", emit: fasta_alignment
+    path "*.phy"     , emit: paml_alignment
 
     script:
     def prefix = sequences.baseName
