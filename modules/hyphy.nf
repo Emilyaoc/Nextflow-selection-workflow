@@ -10,8 +10,7 @@ process HYPHY {
     }
 
     input:
-    path(fasta)
-    path(tree)
+    tuple val(id), path(fasta), path(tree)
     val test
 
     output:
