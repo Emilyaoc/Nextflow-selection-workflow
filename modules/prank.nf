@@ -2,6 +2,8 @@ params.options = [:]
 
 process PRANK {
 
+    tag "${sequences.simpleName}"
+
     conda (params.enable_conda ? "bioconda::prank:v.150803" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/prank:v.150803--0"
@@ -10,15 +12,15 @@ process PRANK {
     }
 
     input:
-    path( sequences )
-    path( tree )
+    path(sequences)
+    path(tree)
 
     output:
-    path "*.best.fas", emit: fasta_alignment
-    path "*.phy"     , emit: paml_alignment
+    tuple val(prefix), path("*.best.fas"), emit: fasta_alignment
+    tuple val(prefix), path("*.phy")     , emit: paml_alignment
 
     script:
-    def prefix = sequences.baseName
+    prefix     = sequences.baseName
     def args   = task.ext.args  ?: ''
     def args2  = task.ext.args2 ?: ''
     """

@@ -72,29 +72,26 @@ workflow SELECTION_ANALYSES {
 
     main:
     // Phylogenetically-informed codon-based gene sequence alignment
-    species_tree_ch = Channel.value( file( params.species_tree, checkIfExists: true ) )
+    species_tree = file( params.species_tree, checkIfExists: true )
     PRANK (
         gene_sequences,
-        species_tree_ch
+        species_tree
     )
-    gene_tree_ch = Channel.empty()
     if( params.run_codonphyml ) {
         CODONPHYML( PRANK.out.paml_alignment )
-        gene_tree_ch = CODONPHYML.out.codonphyml_tree.collect()
+        hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
+    } else {
+        hyphy_input = PRANK.out.fasta_alignment.combine( Channel.value( species_tree ) )
     }
     // Hyphy branch-site selection tests
     HYPHY (
-        PRANK.out.fasta_alignment,
-        params.run_codonphyml ? gene_tree_ch : species_tree_ch,
+        hyphy_input,
         params.hyphy_test
     )
     // Hyphy JSON to TSV
     JQ (
         HYPHY.out.json,
-        file(
-            "$baseDir/configs/hyphy_jq_filters.jq",
-            checkIfExists:true
-        )
+        file( "$projectDir/configs/hyphy_jq_filters.jq", checkIfExists:true )
     )
     JQ.out.tsv.collectFile(
         name:'allgenes.tsv',

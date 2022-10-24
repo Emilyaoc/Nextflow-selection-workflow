@@ -1,5 +1,7 @@
 process SANITIZE_STOP_CODONS {
 
+    tag "${sequences.baseName}"
+
     // Behavior:
     //   Assumptions:
     //     - Sequences are in 5'3' Frame 1
