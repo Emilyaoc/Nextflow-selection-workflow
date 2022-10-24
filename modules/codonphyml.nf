@@ -13,7 +13,7 @@ process CODONPHYML {
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: alignment.baseName
+    def prefix = task.ext.prefix ?: fa_alignment.baseName
     """
     codonphyml \\
         -i $fa_alignment \\
