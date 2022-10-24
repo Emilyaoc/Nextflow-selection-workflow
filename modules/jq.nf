@@ -2,6 +2,8 @@ params.options = [:]
 
 process JQ {
 
+    tag "${json.simpleName}"
+
     container = ''
     conda (params.enable_conda ? "conda-forge::jq:1.6" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

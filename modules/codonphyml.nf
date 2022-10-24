@@ -1,5 +1,7 @@
 process CODONPHYML {
 
+    tag "${fa_alignment.simpleName}"
+
     container "ghcr.io/emilyaoc/codonphyml:1.0"
 
     input:

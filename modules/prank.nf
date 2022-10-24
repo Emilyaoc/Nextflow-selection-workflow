@@ -2,6 +2,8 @@ params.options = [:]
 
 process PRANK {
 
+    tag "${sequences.simpleName}"
+
     conda (params.enable_conda ? "bioconda::prank:v.150803" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/prank:v.150803--0"
