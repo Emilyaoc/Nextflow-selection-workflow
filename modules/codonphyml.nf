@@ -9,8 +9,9 @@ process CODONPHYML {
     path(foreground_species)
 
     output:
-    tuple val(id), path("*_codonphyml_stats.txt"), emit: codonphyml_stats
-    tuple val(id), path("*_codonphyml_tree.txt"),  emit: codonphyml_tree
+    tuple val(id), path("*_codonphyml_stats.txt"),     emit: codonphyml_stats
+    tuple val(id), path("*_codonphyml_tree.txt"),      emit: codonphyml_tree
+    tuple val(id), path("*_codonphyml_tree.txt.orig"), emit: original_codonphyml_tree, optional: true
 
     script:
     def args   = task.ext.args   ?: ''
@@ -20,8 +21,10 @@ process CODONPHYML {
         -i $fa_alignment \\
         $args
 
-    if [ -f $foregound_species ]; then 
-        mv *_codonphyml_tree.txt original_codonphyml
+    if [ -f "$foregound_species" ]; then 
+        find . -type f -name "*_codonphyml_tree.txt" \\
+            -exec cp {} {}.orig \\; \\
+            -exec bash $projectDir/bin/label_foreground_species.sh {} $foreground_species \\;
     fi
     """
 
