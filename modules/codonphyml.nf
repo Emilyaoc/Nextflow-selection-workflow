@@ -19,6 +19,10 @@ process CODONPHYML {
     codonphyml \\
         -i $fa_alignment \\
         $args
+
+    if [ -f $foregound_species ]; then 
+        mv *_codonphyml_tree.txt original_codonphyml
+    fi
     """
 
 }
