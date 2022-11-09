@@ -6,6 +6,7 @@ process CODONPHYML {
 
     input:
     tuple val(id), path(fa_alignment)
+    path(foreground_species)
 
     output:
     tuple val(id), path("*_codonphyml_stats.txt"), emit: codonphyml_stats
