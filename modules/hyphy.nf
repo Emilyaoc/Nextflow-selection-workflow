@@ -21,7 +21,7 @@ process HYPHY {
     script:
     def args = task.ext.args ?: ''
     """
-    hyphy $args $test --alignment $fasta --tree $tree
+    hyphy $test --alignment $fasta --tree $tree $args
     """
 
 }
