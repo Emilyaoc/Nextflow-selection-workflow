@@ -6,7 +6,7 @@ process CODONPHYML {
 
     input:
     tuple val(id), path(fa_alignment)
-    path(foreground_species)
+    path(species_labels)                    // Optional: Two column input file of Species followed by label e.g. Calocitta_formosa CB
 
     output:
     tuple val(id), path("*_codonphyml_stats.txt"),     emit: codonphyml_stats
@@ -21,10 +21,10 @@ process CODONPHYML {
         -i $fa_alignment \\
         $args
 
-    if [ -f "$foregound_species" ]; then 
+    if [ -f "$species_labels" ]; then 
         find . -type f -name "*_codonphyml_tree.txt" \\
             -exec cp {} {}.orig \\; \\
-            -exec bash $projectDir/bin/label_foreground_species.sh {} $foreground_species \\;
+            -exec label_species.sh {} $species_labels \\;
     fi
     """
 
