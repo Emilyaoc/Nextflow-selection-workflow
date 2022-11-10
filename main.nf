@@ -78,7 +78,10 @@ workflow SELECTION_ANALYSES {
         species_tree
     )
     if( params.run_codonphyml ) {
-        CODONPHYML( PRANK.out.paml_alignment, params.partition_tree? file(params.partition_tree, checkIfExists: true) : [] ) // if partition tree defined then take value given to partition_tree 
+        CODONPHYML( 
+            PRANK.out.paml_alignment, 
+            params.species_labels ? file( params.species_labels, checkIfExists: true ) : [] // Supply species labels file if defined, otherwise leave empty
+        )
         hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
         hyphy_input = PRANK.out.fasta_alignment.combine( Channel.value( species_tree ) )
