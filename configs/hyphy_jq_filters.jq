@@ -10,6 +10,7 @@ if ."analysis"."info" | contains("aBSREL") then
         "Num rate classes",
         "Uncorrected P-Value",
         "Corrected P-Value",
+        "Tested"
         "Rate category",
         "Omega",
         "Proportion"
@@ -23,15 +24,15 @@ if ."analysis"."info" | contains("aBSREL") then
             ."partition count"                     # Partition count
         ]
     ) +
-    ( ."branch attributes"."0" |
-        keys[] as $k |
+    ( ( ."branch attributes"."0" | keys[] ) as $k |
         [
-            $k,                                    # Spp/Node
-            .[$k]."Rate classes",                  # Number of rate classes
-            .[$k]."Uncorrected P-value",           # Uncorrected P-value
-            .[$k]."Corrected P-value"              # Corrected P-value
+            $k,                                                  # Spp/Node
+            ."branch attributes"."0"[$k]."Rate classes",         # Number of rate classes
+            ."branch attributes"."0"[$k]."Uncorrected P-value",  # Uncorrected P-value
+            ."branch attributes"."0"[$k]."Corrected P-value",    # Corrected P-value
+            ."tested"."0"[$k]                                    # Tested
         ] +
-            ( .[$k]."Rate Distributions" |
+            ( ."branch attributes"."0"[$k]."Rate Distributions" |
                 keys[] as $j |
                 [
                     $j,                            # Rate category
