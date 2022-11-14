@@ -88,7 +88,8 @@ workflow SELECTION_ANALYSES {
     // Hyphy branch-site selection tests
     HYPHY (
         hyphy_input,
-        params.hyphy_test
+        params.hyphy_test,
+        params.species_labels ? file( params.species_labels, checkIfExists: true ) : [] // Supply species labels file if defined, otherwise leave empty
     )
     // Hyphy JSON to TSV
     JQ (
