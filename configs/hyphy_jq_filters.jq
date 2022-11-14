@@ -2,26 +2,40 @@
 if ."analysis"."info" | contains("aBSREL") then
     # Print Header
     [
+        "Testname",
         "Filename",
         "Sequences",
         "Sites",
         "Partition count",
+        "Positive test results",
+        "Test category",
         "Spp/Node",
         "Num rate classes",
         "Uncorrected P-Value",
         "Corrected P-Value",
-        "Tested"
+        "Tested",
         "Rate category",
         "Omega",
         "Proportion"
     ],
     # Print table values
+    ( ."analysis" |
+        [
+            ."info"                                # Name of HyPhy test
+        ]
+    ) +                          
     ( ."input" |
         [
             ."file name",                          # Name of file
             ."number of sequences",                # Number of sequences
             ."number of sites",                    # Number of sites
             ."partition count"                     # Partition count
+        ]
+    ) +                         
+    ( ."test results" |
+        [
+            ."positive test results",               # Number of significant results
+            ."tested"                               # Number of tests performed
         ]
     ) +
     ( ( ."branch attributes"."0" | keys[] ) as $k |
@@ -40,7 +54,9 @@ if ."analysis"."info" | contains("aBSREL") then
                     .[$j][1]                       # Proportion
                 ]
             )
-    ) |
+    ) 
+   |
+    
     # Convert JSON to TSV
     @tsv
 elif ."analysis"."info" | contains("FEL") then
