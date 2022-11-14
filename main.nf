@@ -100,7 +100,7 @@ workflow SELECTION_ANALYSES {
         name:'allgenes.tsv',
         skip:1,
         keepHeader:true,
-        storeDir:"${params.results}/03_HyPhy_selection_analysis"
+        storeDir:"${params.results}/04_HyPhy_selection_analysis"
     )
 
 }
