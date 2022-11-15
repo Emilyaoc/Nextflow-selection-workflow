@@ -79,8 +79,7 @@ workflow SELECTION_ANALYSES {
     )
     if( params.run_codonphyml ) {
         CODONPHYML( 
-            PRANK.out.paml_alignment, 
-            params.species_labels ? file( params.species_labels, checkIfExists: true ) : [] // Supply species labels file if defined, otherwise leave empty
+            PRANK.out.paml_alignment    
         )
         hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
@@ -89,7 +88,8 @@ workflow SELECTION_ANALYSES {
     // Hyphy branch-site selection tests
     HYPHY (
         hyphy_input,
-        params.hyphy_test
+        params.hyphy_test,
+        params.species_labels ? file( params.species_labels, checkIfExists: true ) : [] // Supply species labels file if defined, otherwise leave empty
     )
     // Hyphy JSON to TSV
     JQ (

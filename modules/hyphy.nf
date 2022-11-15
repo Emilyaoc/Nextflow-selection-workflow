@@ -13,15 +13,25 @@ process HYPHY {
 
     input:
     tuple val(id), path(fasta), path(tree)
-    val test
+    val test                               // Hyphy test: If ends with .bf, will look for script in bin folder
+    path species_labels                    // Optional: option file to relabel species with
 
     output:
-    path "*.json", emit: json
+    path "*.json"         , emit: json
+    path "*.relabeled.nwk", emit: relabeled_newick, optional: true
 
     script:
-    def args = task.ext.args ?: ''
+    def args = task.ext.args ?: ''    // optional command-line args for hyphy <test>
+    def args2 = task.ext.args2 ?: ''  // optional command-line args for hyphy label-tree
     """
-    hyphy $test --alignment $fasta --tree $tree $args
+    if [ -f "$species_labels" ]; then
+        hyphy $projectDir/bin/label-tree.bf --tree $tree  --list $species_labels --output ${tree.baseName}.relabeled.nwk $args2
+    fi
+
+    hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" ? test} \\
+        --alignment $fasta \\
+        --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
+        $args
     """
 
 }
