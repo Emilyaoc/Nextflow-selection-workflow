@@ -28,7 +28,7 @@ process HYPHY {
         hyphy $projectDir/bin/label-tree.bf --tree $tree  --list $species_labels --output ${tree.baseName}.relabeled.nwk $args2
     fi
 
-    hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" ? test} \\
+    hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
         --alignment $fasta \\
         --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
         $args
