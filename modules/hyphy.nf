@@ -25,7 +25,7 @@ process HYPHY {
     def args2 = task.ext.args2 ?: ''  // optional command-line args for hyphy label-tree
     """
     if [ -f "$species_labels" ]; then
-        hyphy $projectDir/bin/label-tree.bf --tree $tree  --list $species_labels --output ${tree.baseName}.relabeled.nwk $args2
+        hyphy $projectDir/bin/label-tree.bf --tree $tree  --list $species_labels --label CB --internal-nodes None --output ${tree.baseName}.relabeled.nwk $args2
     fi
 
     hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
