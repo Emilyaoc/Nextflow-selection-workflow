@@ -8,12 +8,12 @@ if ."analysis"."info" | contains("aBSREL") then
         "Sites",
         "Partition count",
         "Positive test results",
-        "Test category",
+        "Tested",
         "Spp/Node",
         "Num rate classes",
         "Uncorrected P-Value",
         "Corrected P-Value",
-        "Tested",
+        "Test category",
         "Rate category",
         "Omega",
         "Proportion"
@@ -44,7 +44,7 @@ if ."analysis"."info" | contains("aBSREL") then
             ."branch attributes"."0"[$k]."Rate classes",         # Number of rate classes
             ."branch attributes"."0"[$k]."Uncorrected P-value",  # Uncorrected P-value
             ."branch attributes"."0"[$k]."Corrected P-value",    # Corrected P-value
-            ."tested"."0"[$k]                                    # Tested
+            ."tested"."0"[$k]                                    # Test categories (Test or Background)
         ] +
             ( ."branch attributes"."0"[$k]."Rate Distributions" |
                 keys[] as $j |
