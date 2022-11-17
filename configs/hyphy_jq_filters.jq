@@ -1,6 +1,6 @@
 # HyPhy filter (see below for explanation)
 if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
-        # Print Header
+    # Print Header
     [
         "Testname",
         "Filename",
@@ -14,12 +14,9 @@ if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
         "Branch K",
         "Test category"
     ],
-    # Print table values
-    ( 
-        [
-         "RELAX"                                   # Name of HyPhy test
-        ]
-    ) +                          
+    # Print table values 
+    [ "RELAX" ]                                    # Name of HyPhy test 
+    +                          
     ( ."input" |
         [
             ."file name",                          # Name of file
@@ -41,8 +38,7 @@ if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
             ."branch attributes"."0"[$k]."k (general descriptive)",  # K of branch
             ."tested"."0"[$k]                                    # Test category (Test or Reference)
         ] 
-    ) 
-   |   
+    ) |   
     # Convert JSON to TSV
     @tsv
 elif ."analysis"."info" | contains("aBSREL") then
@@ -100,8 +96,7 @@ elif ."analysis"."info" | contains("aBSREL") then
                     .[$j][1]                       # Proportion
                 ]
             )
-    ) 
-   | 
+    ) | 
     # Convert JSON to TSV
     @tsv
 elif ."analysis"."info" | contains("FEL") then
@@ -136,28 +131,27 @@ elif ."analysis"."info" | contains("BUSTED") then
     ( . "fits" . "Unconstrained model" . "Rate Distributions" . "Test" . "0" | 
         [
             ."omega",                          # omega w1
-            ."proportion"                     # proportion w1
+            ."proportion"                      # proportion w1
         ]
-     ) +
+    ) +
     ( . "fits" . "Unconstrained model" . "Rate Distributions" . "Test" . "1" | 
         [
             ."omega",                          # omega w2
             ."proportion"                      # proportion w2
         ]
-     ) +      
+    ) +      
     ( . "fits" . "Unconstrained model" . "Rate Distributions" . "Test" . "2" | 
         [
             ."omega",                          # omega w3
-            ."proportion"                     # proportion w3
+            ."proportion"                      # proportion w3
         ]
-     ) + 
+    ) + 
     ( ."test results" |
         [
             ."LRT",                            # LRT 
-            ."p-value"                        # P-value
+            ."p-value"                         # P-value
         ]
-     ) | @tsv 					# Convert JSON to TSV
-    
+    ) | @tsv 					               # Convert JSON to TSV
 else
     empty
 end
