@@ -25,7 +25,20 @@ process HYPHY {
     def args2 = task.ext.args2 ?: ''  // optional command-line args for hyphy label-tree
     """
     if [ -f "$species_labels" ]; then
-        hyphy $projectDir/bin/label-tree.bf --tree $tree  --list $species_labels --label CB --internal-nodes "None" --output ${tree.baseName}.relabeled.nwk $args2
+        # $species_labels is a two column file
+        # Awk makes a label.spp file containing all species (\$1) with that label (\$2)
+        awk '{ print \$1 >> ( \$2 ".spp" ) }' $species_labels
+        # Use an intermediate file for relabelling
+        cp $tree ${tree.baseName}.intermediate.nwk
+        # Iterate over labels
+        for SPP in *.spp; do
+            hyphy $projectDir/bin/label-tree.bf \\
+                --tree ${tree.baseName}.intermediate.nwk \\
+                --list \$SPP \\
+                --label \${SPP%.spp} \\
+                --output ${tree.baseName}.relabeled.nwk $args2
+            cp ${tree.baseName}.relabeled.nwk ${tree.baseName}.intermediate.nwk
+        done 
     fi
 
     hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
