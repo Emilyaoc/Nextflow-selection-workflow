@@ -1,5 +1,51 @@
 # HyPhy filter (see below for explanation)
-if ."analysis"."info" | contains("aBSREL") then
+if ."branch attributes"."attributes" | contains("RELAX") then
+        # Print Header
+    [
+        "Testname",
+        "Filename",
+        "Sequences",
+        "Sites",
+        "LRT",
+        "P-value",
+        "K",
+        "Spp/Node",
+        "Branch length",
+        "Branch K",
+        "Test category"
+    ],
+    # Print table values
+    ( 
+        [
+         "RELAX"                                   # Name of HyPhy test
+        ]
+    ) +                          
+    ( ."input" |
+        [
+            ."file name",                          # Name of file
+            ."number of sequences",                # Number of sequences
+            ."number of sites"                     # Number of sites
+        ]
+    ) +                         
+    ( ."test results" |
+        [
+            ."LRT",                                            # Results of LRT
+            ."p-value",                                        # Overall P-value
+            ."relaxation or intensification parameter"         # Overall intensification (K) parameter
+        ]
+    ) +
+    ( ( ."branch attributes"."0" | keys[] ) as $k |
+        [
+            $k,                                                  # Spp/Node
+            ."branch attributes"."0"[$k]."Nucleotide GTR",         # Branch length 
+            ."branch attributes"."0"[$k]."k (general descriptive)",  # K of branch
+            ."tested"."0"[$k]                                    # Test category (Test or Reference)
+        ] 
+    ) 
+   |   
+    # Convert JSON to TSV
+    @tsv
+elif ."analysis"."info" | contains("aBSREL") then
     # Print Header
     [
         "Testname",
@@ -55,58 +101,13 @@ if ."analysis"."info" | contains("aBSREL") then
                 ]
             )
     ) 
-   |
-    
+   | 
     # Convert JSON to TSV
     @tsv
 elif ."analysis"."info" | contains("FEL") then
     empty
-elif ."branch attributes"."attributes" | contains("RELAX") then
-        # Print Header
-    [
-        "Testname",
-        "Filename",
-        "Sequences",
-        "Sites",
-        "LRT",
-        "P-value",
-        "K",
-        "Spp/Node",
-        "Branch length",
-        "Branch K",
-        "Test category"
-    ],
-    # Print table values
-    ( 
-        [
-         "RELAX"                                   # Name of HyPhy test
-        ]
-    ) +                          
-    ( ."input" |
-        [
-            ."file name",                          # Name of file
-            ."number of sequences",                # Number of sequences
-            ."number of sites"                     # Number of sites
-        ]
-    ) +                         
-    ( ."test results" |
-        [
-            ."LRT",                                            # Results of LRT
-            ."p-value",                                        # Overall P-value
-            ."relaxation or intensification parameter"         # Overall intensification (K) parameter
-        ]
-    ) +
-    ( ( ."branch attributes"."0" | keys[] ) as $k |
-        [
-            $k,                                                  # Spp/Node
-            ."branch attributes"."0"[$k]."Nucleotide GTR",         # Branch length 
-            ."branch attributes"."0"[$k]."k (general descriptive)",  # K of branch
-            ."tested"."0"[$k]                                    # Test category (Test or Reference)
-        ] 
-    ) 
-   |   
-    # Convert JSON to TSV
-    @tsv
+elif ."analysis"."info" | contains("BUSTED-PH") then
+    empty
 elif ."analysis"."info" | contains("BUSTED") then
     # Print Header
     [
