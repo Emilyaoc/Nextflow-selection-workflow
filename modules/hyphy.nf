@@ -36,7 +36,6 @@ process HYPHY {
                 --tree ${tree.baseName}.intermediate.nwk \\
                 --list \$SPP \\
                 --label \${SPP%.spp} \\
-                --internal-nodes "None" \\
                 --output ${tree.baseName}.relabeled.nwk $args2
             cp ${tree.baseName}.relabeled.nwk ${tree.baseName}.intermediate.nwk
         done 
