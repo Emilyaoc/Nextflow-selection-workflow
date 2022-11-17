@@ -1,5 +1,5 @@
 # HyPhy filter (see below for explanation)
-if ."branch attributes"."attributes" | contains("RELAX") then
+if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
         # Print Header
     [
         "Testname",
