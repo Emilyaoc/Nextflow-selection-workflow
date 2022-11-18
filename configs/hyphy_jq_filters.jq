@@ -63,7 +63,7 @@ elif ."analysis"."info" | contains("aBSREL") then
     # Print table values
     ( ."analysis" |
         [
-            ."info"                                # Name of HyPhy test
+            ."info" | capture("(?<test>[a-zA-Z]+)" ).test  # Name of HyPhy test
         ]
     ) +                          
     ( ."input" |
@@ -102,10 +102,88 @@ elif ."analysis"."info" | contains("aBSREL") then
 elif ."analysis"."info" | contains("FEL") then
     empty
 elif ."analysis"."info" | contains("BUSTED-PH") then
-    empty
+        # Print Header
+    [
+        "Testname",
+        "Filename",
+        "Sequences",
+        "Sites",
+        "Partition count",
+        "Background Omega W1",
+        "Background Proportion W1",
+        "Background Omega W2",
+        "Background Proportion W2",
+        "Background Omega W3",
+        "Background Proportion W3",
+        "Test Omega W1",
+        "Test Proportion W1",
+        "Test Omega W2",
+        "Test Proportion W2",
+        "Test Omega W3",
+        "Test Proportion W3",
+        "LRT",
+        "P-Value"
+    ],
+    # Print table values
+    ( ."analysis" |
+        [
+            ."info" | capture("(?<test>[a-zA-Z]+)" ).test   # Name of HyPhy test
+        ]
+    ) +   
+    ( ."input" |
+        [
+            ."file name",                          # Name of file
+            ."number of sequences",                # Number of sequences
+            ."number of sites",                    # Number of sites
+            ."partition count"                     # Partition count
+        ]
+    ) +
+    ( ."fits"."Unconstrained model"."Rate Distributions"."Background". "0" | 
+        [
+            ."omega",                          # Background omega w1
+            ."proportion"                      # proportion w1
+        ]
+    ) +
+        ( ."fits"."Unconstrained model"."Rate Distributions"."Background". "1" | 
+        [
+            ."omega",                          # Background omega w2
+            ."proportion"                      # Background proportion w2
+        ]
+    ) +
+    ( ."fits"."Unconstrained model"."Rate Distributions"."Background". "2" | 
+        [
+            ."omega",                          # Background omega w3
+            ."proportion"                      # Background proportion w3
+        ]
+    ) +
+    ( ."fits"."Unconstrained model"."Rate Distributions"."Test". "0" | 
+        [
+            ."omega",                          # Test omega w1
+            ."proportion"                      # Test proportion w1
+        ]
+    ) +
+    ( ."fits"."Unconstrained model"."Rate Distributions"."Test". "1" | 
+        [
+            ."omega",                          # Test omega w2
+            ."proportion"                      # Test proportion w2
+        ]
+    ) +
+    ( ."fits"."Unconstrained model"."Rate Distributions"."Test". "2" | 
+        [
+            ."omega",                          # Test omega w3
+            ."proportion"                      # Test proportion w3
+        ]
+    ) +
+    ( ."test results" |
+        [
+            ."LRT",                            # LRT 
+            ."p-value"                         # P-value
+        ]
+    ) | @tsv 					               # Convert JSON to TSV
 elif ."analysis"."info" | contains("BUSTED") then
     # Print Header
     [
+        "Testname",
         "Filename",
         "Sequences",
         "Sites",
@@ -120,6 +198,11 @@ elif ."analysis"."info" | contains("BUSTED") then
         "P-Value"
     ],
     # Print table values
+    ( ."analysis" |
+        [
+            ."info" | capture("(?<test>[a-zA-Z]+)" ).test   # Name of HyPhy test
+        ]
+    ) +
     ( ."input" |
         [
             ."file name",                          # Name of file
