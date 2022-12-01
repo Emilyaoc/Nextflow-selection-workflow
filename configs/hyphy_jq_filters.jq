@@ -99,6 +99,40 @@ elif ."analysis"."info" | contains("aBSREL") then
     ) | 
     # Convert JSON to TSV
     @tsv
+elif ."analysis"."info" | contains("Contrast-FEL") then
+    # Print Header
+    [
+        "Testname",
+        "Filename",
+        "Sequences",
+        "Sites",
+        "Site Number",
+        "alpha"
+    ],
+    # Print table values
+    ( ."analysis" |
+        [
+            ."info" | capture("(?<test>[a-zA-Z]+)" ).test  # Name of HyPhy test
+        ]
+    ) +
+    ( ."input" |
+        [
+            ."file name",                          # Name of file
+            ."number of sequences",                # Number of sequences
+            ."number of sites"                    # Number of sites
+        ]
+    ) + 
+        (  ."data partitions"."0" |
+        [
+            ."coverage"                          # Site number
+        ]
+    ) + 
+        (  ."MLE"."content"|
+        [
+            ."0"[][0]                          # alpha: Synonymous substitution rate at a site
+        ]
+    ) | @tsv 
+    
 elif ."analysis"."info" | contains("FEL") then
     empty
 elif ."analysis"."info" | contains("BUSTED-PH") then
