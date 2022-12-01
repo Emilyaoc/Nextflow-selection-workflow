@@ -129,7 +129,7 @@ elif ."analysis"."info" | contains("Contrast-FEL") then
     ) + 
         (  ."MLE"."content"|
         [
-            ."0"[][0]                          # alpha: Synonymous substitution rate at a site
+            ."0"[][0]                          # alpha: Synonymous substitution rate at a site - doesn't work
         ]
     ) | @tsv 
     
