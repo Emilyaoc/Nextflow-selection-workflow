@@ -78,7 +78,9 @@ workflow SELECTION_ANALYSES {
         species_tree
     )
     if( params.run_codonphyml ) {
-        CODONPHYML( PRANK.out.paml_alignment )
+        CODONPHYML( 
+            PRANK.out.paml_alignment    
+        )
         hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
         hyphy_input = PRANK.out.fasta_alignment.combine( Channel.value( species_tree ) )
@@ -86,7 +88,8 @@ workflow SELECTION_ANALYSES {
     // Hyphy branch-site selection tests
     HYPHY (
         hyphy_input,
-        params.hyphy_test
+        params.hyphy_test,
+        params.species_labels ? file( params.species_labels, checkIfExists: true ) : [] // Supply species labels file if defined, otherwise leave empty
     )
     // Hyphy JSON to TSV
     JQ (
@@ -97,7 +100,7 @@ workflow SELECTION_ANALYSES {
         name:'allgenes.tsv',
         skip:1,
         keepHeader:true,
-        storeDir:"${params.results}/03_HyPhy_selection_analysis"
+        storeDir:"${params.results}/04_HyPhy_selection_analysis"
     )
 
 }

@@ -8,8 +8,8 @@ process CODONPHYML {
     tuple val(id), path(fa_alignment)
 
     output:
-    tuple val(id), path("*_codonphyml_stats.txt"), emit: codonphyml_stats
-    tuple val(id), path("*_codonphyml_tree.txt"),  emit: codonphyml_tree
+    tuple val(id), path("*_codonphyml_stats.txt"),     emit: codonphyml_stats
+    tuple val(id), path("*_codonphyml_tree.txt"),      emit: codonphyml_tree
 
     script:
     def args   = task.ext.args   ?: ''
@@ -19,5 +19,4 @@ process CODONPHYML {
         -i $fa_alignment \\
         $args
     """
-
 }
