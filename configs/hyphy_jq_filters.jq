@@ -16,14 +16,20 @@ if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
     ],
     # Print table values 
     [ "RELAX" ]                                    # Name of HyPhy test 
-    +                          
-    ( ."input" |
-        [
-            ."file name",                          # Name of file
-            ."number of sequences",                # Number of sequences
-            ."number of sites"                     # Number of sites
-        ]
-    ) +                         
+    +   
+    ( 
+        ."input" |
+            [
+                ."file name" | capture("(?<fname>[0-9a-zA-Z_.]+)$").fname  # Name of file
+            ]
+    ) +
+    (
+        ."input" |
+            [
+                ."number of sequences",                                                 # Number of sequences
+                ."number of sites"                                                      # Number of sites
+            ]
+    ) +                                                 
     ( ."test results" |
         [
             ."LRT",                                            # Results of LRT
@@ -65,10 +71,14 @@ elif ."analysis"."info" | contains("aBSREL") then
         [
             ."info" | capture("(?<test>[a-zA-Z]+)" ).test  # Name of HyPhy test
         ]
-    ) +                          
+    ) +    
+    (  ."input" |
+            [
+                ."file name" | capture("(?<fname>[0-9a-zA-Z_.]+)$").fname  # Name of file
+            ]
+    ) +                      
     ( ."input" |
         [
-            ."file name",                          # Name of file
             ."number of sequences",                # Number of sequences
             ."number of sites",                    # Number of sites
             ."partition count"                     # Partition count
@@ -116,11 +126,17 @@ elif ."analysis"."info" | contains("Contrast-FEL") then
     ) + ( 
         ."input" |
             [
-                ."file name",                          # Name of file
-                ."number of sequences",                # Number of sequences
-                ."number of sites"                     # Number of sites
+                ."file name" | capture("(?<fname>[0-9a-zA-Z_.]+)$").fname  # Name of file
             ]
-    ) + (  
+    ) +
+    (
+        ."input" |
+            [
+                ."number of sequences",                                                 # Number of sequences
+                ."number of sites"                                                      # Number of sites
+            ]
+    ) + 
+    (  
         range( ."data partitions"."0"."coverage"[] | length ) as $idx | 
             [ ."data partitions"."0"."coverage"[][$idx] ]                # Site number
             + ."MLE"."content"."0"[$idx]                                 # Rate classes
@@ -147,8 +163,12 @@ elif ."analysis"."info" | contains("BUSTED-PH") then
         "Test Proportion W2",
         "Test Omega W3",
         "Test Proportion W3",
-        "LRT",
-        "P-Value"
+        "Test LRT",
+        "Test P-Value",
+        "Background LRT",
+        "Background P-Value",
+        "Shared LRT",
+        "Shared P-Value"
     ],
     # Print table values
     ( ."analysis" |
@@ -158,10 +178,14 @@ elif ."analysis"."info" | contains("BUSTED-PH") then
     ) +   
     ( ."input" |
         [
-            ."file name",                          # Name of file
-            ."number of sequences",                # Number of sequences
-            ."number of sites",                    # Number of sites
-            ."partition count"                     # Partition count
+            ."file name" | capture("(?<fname>[0-9a-zA-Z_.]+)$").fname  # Name of file
+        ]
+    ) +
+        ( ."input" |
+        [
+            ."number of sequences",                                     # Number of sequences
+            ."number of sites",                                         # Number of sites
+            ."partition count"                                           # Partition count
         ]
     ) +
     ( ."fits"."Unconstrained model"."Rate Distributions"."Background". "0" | 
@@ -202,10 +226,23 @@ elif ."analysis"."info" | contains("BUSTED-PH") then
     ) +
     ( ."test results" |
         [
-            ."LRT",                            # LRT 
-            ."p-value"                         # P-value
+            ."LRT",                            # Test LRT 
+            ."p-value"                         # Test P-value
         ]
-    ) | @tsv 					               # Convert JSON to TSV
+    ) +
+    ( ."test results background" |
+        [
+            ."LRT",                            # Background LRT 
+            ."p-value"                         # Background P-value
+        ]
+    ) +
+    ( ."test results shared distributions" |
+        [
+            ."LRT",                            # Shared LRT 
+            ."p-value"                         # Shared P-value
+        ]
+    )
+    | @tsv 					               # Convert JSON to TSV
 elif ."analysis"."info" | contains("BUSTED") then
     # Print Header
     [
