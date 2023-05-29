@@ -141,6 +141,37 @@ elif ."analysis"."info" | contains("Contrast-FEL") then
             [ ."data partitions"."0"."coverage"[][$idx] ]                # Site number
             + ."MLE"."content"."0"[$idx]                                 # Rate classes
     ) | @tsv 
+    elif ."analysis"."info" | contains("MEME") then
+    # Print Header
+    [
+        "Testname",
+        "Filename",
+        "Sequences",
+        "Sites"
+    ] + [ ."MLE"."headers"[][0] ],
+    # Print table values
+    ( ."analysis" |
+        [
+            ."info" | capture("(?<test>[a-zA-Z-]+)" ).test  # Name of HyPhy test
+        ]
+    ) + ( 
+        ."input" |
+            [
+                ."file name" | capture("(?<fname>[0-9a-zA-Z_.]+)$").fname  # Name of file
+            ]
+    ) +
+    (
+        ."input" |
+            [
+                ."number of sequences",                                                 # Number of sequences
+                ."number of sites"                                                      # Number of sites
+            ]
+    ) + 
+    (  
+        range( ."data partitions"."0"."coverage"[] | length ) as $idx | 
+            [ ."data partitions"."0"."coverage"[][$idx] ]                # Site number
+            + ."MLE"."content"."0"[$idx]                                 # Site results
+    ) | @tsv 
 elif ."analysis"."info" | contains("FEL") then
     empty
 elif ."analysis"."info" | contains("BUSTED-PH") then
