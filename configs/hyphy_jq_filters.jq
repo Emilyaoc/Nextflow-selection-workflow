@@ -147,7 +147,8 @@ elif ."analysis"."info" | contains("Contrast-FEL") then
         "Testname",
         "Filename",
         "Sequences",
-        "Sites"
+        "Sites",
+        "Condon_nr"
     ] + [ ."MLE"."headers"[][0] ],
     # Print table values
     ( ."analysis" |
