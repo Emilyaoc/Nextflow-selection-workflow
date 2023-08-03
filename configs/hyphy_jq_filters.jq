@@ -58,6 +58,9 @@ elif ."analysis"."info" | contains("aBSREL") then
         "Positive test results",
         "Tested",
         "Spp/Node",
+        "Branch length",
+        "dN",
+        "dS",
         "Num rate classes",
         "Uncorrected P-Value",
         "Corrected P-Value",
@@ -93,6 +96,9 @@ elif ."analysis"."info" | contains("aBSREL") then
     ( ( ."branch attributes"."0" | keys[] ) as $k |
         [
             $k,                                                  # Spp/Node
+            ."branch attributes"."0"[$k]."Full adaptive model",  # branch length
+            ."branch attributes"."0"[$k]."Full adaptive model (non-synonymous subs/site)", # dN
+            ."branch attributes"."0"[$k]."Full adaptive model (synonymous subs/site)", # dS
             ."branch attributes"."0"[$k]."Rate classes",         # Number of rate classes
             ."branch attributes"."0"[$k]."Uncorrected P-value",  # Uncorrected P-value
             ."branch attributes"."0"[$k]."Corrected P-value",    # Corrected P-value
