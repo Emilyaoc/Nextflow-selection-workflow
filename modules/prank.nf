@@ -4,11 +4,11 @@ process PRANK {
 
     tag "${sequences.simpleName}"
 
-    conda (params.enable_conda ? "bioconda::prank:v.150803" : null)
+    conda (params.enable_conda ? "bioconda::prank:v.170427" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/prank:v.150803--0"
+        container "https://depot.galaxyproject.org/singularity/prank:170427--h9948957_1"
     } else {
-        container "quay.io/biocontainers/prank:v.150803--0"
+        container "quay.io/biocontainers/prank:170427--h9948957_1"
     }
 
     input:
