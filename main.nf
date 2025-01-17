@@ -20,7 +20,7 @@ workflow {
 
     // Check a project allocation is given for running on Uppmax clusters.
     if (workflow.profile == "uppmax" && !params.project) {
-        exit(1, "Please provide a SNIC project number ( --project )!\n")
+        error "Please provide a SNIC project number ( --project )!\n"
     }
 
     VALIDATE_SEQUENCES()
@@ -33,8 +33,7 @@ workflow VALIDATE_SEQUENCES {
     main:
     // Get data (from params.config if available)
     Channel
-        .fromPath(params.gene_sequences)
-        .ifEmpty { exit(1, "Please provide a gene sequence file (--gene_sequences ${params.gene_sequences})!\n") }
+        .fromPath( params.gene_sequences, checkIfExists: true )
         .set { gene_seq_ch }
 
     // Check sequences for stop codons
