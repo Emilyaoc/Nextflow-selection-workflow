@@ -72,20 +72,33 @@ workflow SELECTION_ANALYSES {
         hyphy_input = PRANK.out.fasta_alignment.combine(Channel.value(species_tree))
     }
     // Hyphy branch-site selection tests
-    HYPHY(
-        hyphy_input,
-        params.hyphy_test,
-        params.species_labels ? file(params.species_labels, checkIfExists: true) : [],
-    )
-    // Hyphy JSON to TSV
-    JQ(
-        HYPHY.out.json,
-        file("${projectDir}/configs/hyphy_jq_filters.jq", checkIfExists: true),
-    )
-    JQ.out.tsv.collectFile(
-        name: 'allgenes.tsv',
-        skip: 1,
-        keepHeader: true,
-        storeDir: "${params.results}/04_HyPhy_selection_analysis",
-    )
+    if( params.hyphy_test && params.hyphy_test.keySet().every{ key -> key instanceof Map } ) {
+        ch_hyphy_input = hyphy_input.flatMap{ id, path, tree -> 
+            params.hyphy_test
+                .keySet() // Get test names
+                .collect { test ->
+                    params.hyphy_test[test].collect { setting_id, settings ->
+                        tuple( [ sample_id: id, setting_id: setting_id, settings: (settings?: '') ] , path, tree, test ) 
+                    } // Produce list of inputs
+                }
+                .flatten() // turn list of lists into list
+        }
+        HYPHY(
+            ch_hyphy_input,
+            params.species_labels ? file(params.species_labels, checkIfExists: true) : [],
+        )
+        // Hyphy JSON to TSV
+        JQ(
+            HYPHY.out.json,
+            file("${projectDir}/configs/hyphy_jq_filters.jq", checkIfExists: true),
+        )
+        JQ.out.tsv.collectFile(
+            name: 'allgenes.tsv',
+            skip: 1,
+            keepHeader: true,
+            storeDir: "${params.results}/04_HyPhy_selection_analysis",
+        )
+    } else {
+        error "Error: Please supply one or more hyphy tests as described in the README!\n"
+    }
 }

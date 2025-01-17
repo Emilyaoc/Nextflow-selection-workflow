@@ -55,6 +55,8 @@ Mandatory:
 
 - `gene_sequences`: A set of gene sequences in fasta format to be sanitized and aligned.
 - `species_tree`: A species tree in Newick format to guide alignment.
+- **HYPHY** `hyphy_test`: The hyphy branch-site test to use.
+    Supported values are `absrel`, `busted`, and `fel`.
 
 Optional:
 
@@ -65,10 +67,6 @@ Optional:
 publishing method from the intermediate results folders
 (see [Table of publish modes](https://www.nextflow.io/docs/latest/process.html#publishdir)).
 
-    Software specific:
-    - **HYPHY** `hyphy_test`: The hyphy branch-site test to use.
-    Supported values are `absrel` (default), `busted`, and `fel`.
-
 ### Workflow outputs
 
 All results are published to the path assigned to the workflow parameter `results`.
@@ -78,7 +76,7 @@ All results are published to the path assigned to the workflow parameter `result
 codons removed.
 - `02_Prank_alignment/`: Phylogenetically guided gene sequence alignments.
 - `03_HyPhy_selection_analysis/`: Hyphy selection analyses, and TSV of results.
-- `pipeline_info/`: A folder containing workflow execution details.
+- `pipeline_info/`: A folder containing workflow execution details (if -profile pipeline_info).
 
 ### Customisation for Uppmax
 

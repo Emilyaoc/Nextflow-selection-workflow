@@ -7,13 +7,12 @@ process HYPHY {
         "quay.io/biocontainers/hyphy:2.5.65--he91c24d_0" }"
 
     input:
-    tuple val(id), path(fasta), path(tree)
-    val test                               // Hyphy test: If ends with .bf, will look for script in bin folder
-    path species_labels                    // Optional: option file to relabel species with
+    tuple val(metadata), path(fasta), path(tree), val (test) 
+    path species_labels  // Optional: option file to relabel species with
 
     script:
-    def args = task.ext.args ?: ''    // optional command-line args for hyphy <test>
-    def args2 = task.ext.args2 ?: ''  // optional command-line args for hyphy label-tree
+    def args  = metadata.settings ?: '' // command-line args for hyphy <test>
+    def args2 = task.ext.args2 ?: ''    // optional command-line args for hyphy label-tree
     """
     if [ -f "$species_labels" ]; then
         # $species_labels is a two column file
@@ -32,6 +31,7 @@ process HYPHY {
         done 
     fi
 
+    # Hyphy test: If ends with .bf, will look for script in bin folder
     hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
         --alignment $fasta \\
         --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
