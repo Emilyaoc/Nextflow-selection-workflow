@@ -1,1 +1,21 @@
-**/.DS_Store
+# Pipeline files
+results/
+*_cache/
+
+# Pixi files
+.pixi/
+*.egg-info
+
+# Nextflow files
+.nextflow*
+work/
+
+# nf-test files
+.nf-test.log
+.nf-test/
+
+# misc
+.DS_Store
+.screenrc
+slurm*.out
+slurm*.err
