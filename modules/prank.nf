@@ -1,23 +1,14 @@
-params.options = [:]
-
 process PRANK {
-
+    // directives:
     tag "${sequences.simpleName}"
-
-    conda (params.enable_conda ? "bioconda::prank:v.170427" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/prank:170427--h9948957_1"
-    } else {
-        container "quay.io/biocontainers/prank:170427--h9948957_1"
-    }
+    conda "bioconda::prank:v.170427"
+    container "${workflow.containerEngine in [ 'singularity', 'apptainer' ] ?
+        "https://depot.galaxyproject.org/singularity/prank:170427--h9948957_1" :
+        "quay.io/biocontainers/prank:170427--h9948957_1" }"
 
     input:
     path(sequences)
     path(tree)
-
-    output:
-    tuple val(prefix), path("*.best.fas"), emit: fasta_alignment
-    tuple val(prefix), path("*.phy")     , emit: paml_alignment
 
     script:
     prefix     = sequences.baseName
@@ -33,4 +24,7 @@ process PRANK {
         -o=${prefix}
     """
 
+    output:
+    tuple val(prefix), path("*.best.fas"), emit: fasta_alignment
+    tuple val(prefix), path("*.phy")     , emit: paml_alignment
 }

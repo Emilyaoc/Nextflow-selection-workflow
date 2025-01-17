@@ -1,24 +1,15 @@
-params.options = [:]
-
 process HYPHY {
-
+    // directives:
     tag "${fasta.simpleName}"
-
-    conda (params.enable_conda ? "bioconda::hyphy:2.5.65" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/hyphy:2.5.65--he91c24d_0"
-    } else {
-        container "quay.io/biocontainers/hyphy:2.5.65--he91c24d_0"
-    }
+    conda "bioconda::hyphy:2.5.65"
+    container "${workflow.containerEngine in [ 'singularity', 'apptainer' ] ?
+        "https://depot.galaxyproject.org/singularity/hyphy:2.5.65--he91c24d_0" :
+        "quay.io/biocontainers/hyphy:2.5.65--he91c24d_0" }"
 
     input:
     tuple val(id), path(fasta), path(tree)
     val test                               // Hyphy test: If ends with .bf, will look for script in bin folder
     path species_labels                    // Optional: option file to relabel species with
-
-    output:
-    path "*.json"         , emit: json
-    path "*.relabeled.nwk", emit: relabeled_newick, optional: true
 
     script:
     def args = task.ext.args ?: ''    // optional command-line args for hyphy <test>
@@ -47,4 +38,7 @@ process HYPHY {
         $args
     """
 
+    output:
+    path "*.json"         , emit: json
+    path "*.relabeled.nwk", emit: relabeled_newick, optional: true
 }
