@@ -1,21 +1,4 @@
 #! /usr/bin/env nextflow
-
-// Default workflow parameters are provided in the file 'nextflow.config'.
-
-// Print Workflow header
-log.info("""
-NBIS support 5875
-
- Measuring selection in avian immune genes
- ===================================
-
-""")
-
-// Check a project allocation is given for running on Uppmax clusters.
-if(workflow.profile == "uppmax" && !params.project){
-    exit 1, "Please provide a SNIC project number ( --project )!\n"
-}
-
 include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons'
 include { PRANK                } from './modules/prank'
 include { PAML                 } from './modules/paml'
@@ -27,6 +10,19 @@ include { CODONPHYML           } from './modules/codonphyml'
 workflow {
 
     main:
+    log.info("""
+    NBIS support 5875
+
+    Measuring selection in avian immune genes
+    ===================================
+
+    """)
+
+    // Check a project allocation is given for running on Uppmax clusters.
+    if(workflow.profile == "uppmax" && !params.project){
+        exit 1, "Please provide a SNIC project number ( --project )!\n"
+    }
+
     VALIDATE_SEQUENCES()
     SELECTION_ANALYSES(
         VALIDATE_SEQUENCES.out.sequences
