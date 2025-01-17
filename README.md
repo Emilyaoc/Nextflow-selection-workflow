@@ -1,65 +1,65 @@
 # Workflow
 
-The workflows in this folder manage the execution of your analyses
-from beginning to end.
-
-```
-Nextflow-selection-workflow/
- | - bin/                            Custom workflow scripts
- | - configs/                        Configuration files that govern workflow execution
- | - containers/                     Custom container definition files
- | - main.nf                         The primary analysis script
- | - nextflow.config                 General Nextflow configuration
- \ - params.config.TEMPLATE          A Template for parameter configuration
-```
-
 ## Usage:
 
 Usage:
 ```bash
-nextflow run -c <custom config> -profile <profile> <nextflow script> [ -entry VALIDATE_SEQUENCES ]
+nextflow run -c <custom config> -profile <profile> -params-file params.yml <nextflow script> [ -entry VALIDATE_SEQUENCES ]
 ```
+
+where 
 
 There are two workflows which can be run.
 - `VALIDATE_SEQUENCES` only: Enable by including `-entry VALIDATE_SEQUENCES` in the workflow run command. Runs only the sequence validation workflow.
 - Full workflow: The full workflow is the default mode of running and runs both the `VALIDATE_SEQUENCES` workflow and `SELECTION_ANALYSES` workflow.
 
-Workflow parameters can be provided in a custom configuration file.
-A [template](params.config.TEMPLATE) is available to copy in this directory.
-This can also be used to override workflow default settings.
+Workflow parameters should be supplied using a `params.yml` file. 
 
-Some tools used in the workflow can also be configured to use
-alternative parameters such as `JQ`, `PRANK`, and `HYPHY`. Software
-specific parameters are supplied to scripts using the `ext.args`
-process directive. These are assigned in the file
-`configs/modules.config`. Software specific parameters can be
-overridden by updating the process selector configuration in a
-custom configuration file. For example:
+`params.yml`:
+```yml
+# SNIC Compute allocation (only for -profile uppmax/dardel/pdc_kth)
+project: 'snic20XX-YY-ZZ'
 
+# workflow parameters
+gene_sequences: /path/to/gene/sequences/*.fasta
+species_tree: /path/to/species.tree
+# species_labels: /path/to/species.tsv # Optional two column file of species and their labels
+run_codonphyml: false
+
+# Tool settings
+# prank_args: ''
+hyphy_tests:
+    absrel:
+        01: '' # use defaults
+# jq_args: ''
+
+# output
+results: './results'
 ```
-// Workflow parameters
-...
-// Software specific parameters
+
+Override `cpu`, `memory`, and `time` resources by creating a `nextflow.config` in your
+launch directory (where you run `nextflow run ...`), that looks like:
+```nextflow
 process {
-    withName: 'HYPHY' {
-        // Write diagnostic messages to log
-        ext.args = '-m'
+    withName: 'PRANK' {
+        cpus   = 2
+        memory = 20.GB
+        time   = 1.d
     }
 }
-
-<other configuration options>
-...
 ```
 
 ### Workflow parameter inputs
 
 Mandatory:
 
-- `gene_sequences`: A set of gene sequences to be sanitized and aligned.
+- `gene_sequences`: A set of gene sequences in fasta format to be sanitized and aligned.
 - `species_tree`: A species tree in Newick format to guide alignment.
 
 Optional:
 
+- `species_labels`: A two column file of species and their labels.
+- `run_codonphyml`: If true, run codonphyml to make a gene tree for hyphy (default: false) 
 - `results`: The publishing path for results (default: `results`).
 - `publish_mode`: (values: `'symlink'` (default), `'copy'`) The file
 publishing method from the intermediate results folders
@@ -68,15 +68,6 @@ publishing method from the intermediate results folders
     Software specific:
     - **HYPHY** `hyphy_test`: The hyphy branch-site test to use.
     Supported values are `absrel` (default), `busted`, and `fel`.
-
-    Software package manager specific:
-    - `enable_conda`: Set to `true` to use conda as the software package manager (default: `false`).
-    - `singularity_pull_docker_container`: Set to `true` if Singularity images should be
-    built from the docker images, instead of retrieving existing Singularity images (default: `false`).
-
-    Uppmax cluster specific:
-    - `project`: SNIC Compute allocation number.
-    - `clusterOptions`: Additional Uppmax cluster options (e.g., `-M snowy`).
 
 ### Workflow outputs
 
@@ -87,9 +78,7 @@ All results are published to the path assigned to the workflow parameter `result
 codons removed.
 - `02_Prank_alignment/`: Phylogenetically guided gene sequence alignments.
 - `03_HyPhy_selection_analysis/`: Hyphy selection analyses, and TSV of results.
-- `pipeline_info/`: (Optional: See
-[params template](params.config.TEMPLATE))
-A folder containing workflow execution details.
+- `pipeline_info/`: A folder containing workflow execution details.
 
 ### Customisation for Uppmax
 
@@ -109,4 +98,19 @@ for the profile specification.
 The profile is enabled using the `-profile` parameter to nextflow:
 ```bash
 nextflow run -profile uppmax <nextflow_script>
+```
+
+## Project structure
+
+The workflows in this folder manage the execution of your analyses
+from beginning to end.
+
+```
+Nextflow-selection-workflow/
+ | - bin/                            Custom workflow scripts
+ | - configs/                        Configuration files that govern workflow execution
+ | - containers/                     Custom container definition files
+ | - main.nf                         The primary analysis script
+ | - nextflow.config                 General Nextflow configuration
+ \ - params.config.TEMPLATE          A Template for parameter configuration
 ```
