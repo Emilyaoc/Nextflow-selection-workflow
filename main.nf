@@ -8,6 +8,14 @@ include { CODONPHYML } from './modules/codonphyml'
 
 // The main workflow
 workflow {
+    VALIDATE_SEQUENCES()
+    SELECTION_ANALYSES(
+        VALIDATE_SEQUENCES.out.sequences
+    )
+}
+
+workflow VALIDATE_SEQUENCES {
+    main:
     log.info(
         """
     NBIS support 5875
@@ -19,19 +27,10 @@ workflow {
     )
 
     // Check a project allocation is given for running on Uppmax clusters.
-    if (workflow.profile == "uppmax" && !params.project) {
+    if (workflow.profile.tokenize(',').intersect([ 'uppmax, dardel' ]) && !params.project) {
         error "Please provide a SNIC project number ( --project )!\n"
     }
 
-    VALIDATE_SEQUENCES()
-    SELECTION_ANALYSES(
-        VALIDATE_SEQUENCES.out.sequences
-    )
-}
-
-workflow VALIDATE_SEQUENCES {
-    main:
-    // Get data (from params.config if available)
     Channel
         .fromPath( params.gene_sequences, checkIfExists: true )
         .set { gene_seq_ch }
