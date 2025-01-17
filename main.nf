@@ -40,7 +40,7 @@ workflow VALIDATE_SEQUENCES {
     // and santize sequences if possible
     SANITIZE_STOP_CODONS(gene_seq_ch)
     SANITIZE_STOP_CODONS.out.fasta
-        .filter { fasta -> fasta.toString().endsWith("_nostop.fasta") }
+        .filter { fasta -> fasta.baseName.endsWith("_nostop.fasta") }
         .set { gene_sequences }
     SANITIZE_STOP_CODONS.out.tsv.collectFile(
         name: 'failed_sequences.tsv',
