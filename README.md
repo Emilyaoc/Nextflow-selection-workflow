@@ -28,10 +28,9 @@ run_codonphyml: false
 
 # Tool settings
 # prank_args: ''
-hyphy_tests:
+hyphy_test:
     absrel:
         01: '' # use defaults
-# jq_args: ''
 
 # output
 results: './results'
