@@ -11,8 +11,8 @@ process HYPHY {
     path species_labels  // Optional: option file to relabel species with
 
     script:
-    def args  = metadata.settings ?: '' // command-line args for hyphy <test>
-    def args2 = task.ext.args2 ?: ''    // optional command-line args for hyphy label-tree
+    def args  = task.ext.args  ?: '' // command-line args for hyphy <test>
+    def args2 = task.ext.args2 ?: '' // optional command-line args for hyphy label-tree
     """
     if [ -f "$species_labels" ]; then
         # $species_labels is a two column file
