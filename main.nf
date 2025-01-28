@@ -39,7 +39,7 @@ workflow VALIDATE_SEQUENCES {
     // and santize sequences if possible
     SANITIZE_STOP_CODONS(gene_seq_ch)
     SANITIZE_STOP_CODONS.out.fasta
-        .filter { fasta -> fasta.baseName.endsWith("_nostop.fasta") }
+        .filter { fasta -> fasta.name.endsWith("_nostop.fasta") }
         .set { gene_sequences }
     SANITIZE_STOP_CODONS.out.tsv.collectFile(
         name: 'failed_sequences.tsv',
@@ -58,30 +58,27 @@ workflow SELECTION_ANALYSES {
 
     main:
     // Phylogenetically-informed codon-based gene sequence alignment
-    species_tree = file(params.species_tree, checkIfExists: true)
+    species_tree = Channel.fromPath(params.species_tree, checkIfExists: true)
     PRANK(
         gene_sequences,
-        species_tree,
+        species_tree.collect(),
     )
     if (params.run_codonphyml) {
-        CODONPHYML(
-            PRANK.out.paml_alignment
-        )
-        hyphy_input = PRANK.out.fasta_alignment.join(CODONPHYML.out.codonphyml_tree)
+        CODONPHYML( PRANK.out.paml_alignment )
+        hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
-        hyphy_input = PRANK.out.fasta_alignment.combine(Channel.value(species_tree))
+        hyphy_input = PRANK.out.fasta_alignment.combine( species_tree )
     }
     // Hyphy branch-site selection tests
-    if( params.hyphy_test && params.hyphy_test.keySet().every{ key -> key instanceof Map } ) {
+    if( params.hyphy_test && params.hyphy_test.values().every{ key -> key instanceof Map } ) {
         ch_hyphy_input = hyphy_input.flatMap{ id, path, tree -> 
             params.hyphy_test
                 .keySet() // Get test names
-                .collect { test ->
+                .collectMany { test ->
                     params.hyphy_test[test].collect { setting_id, settings ->
                         tuple( [ sample_id: id, setting_id: setting_id, settings: (settings?: '') ] , path, tree, test ) 
                     } // Produce list of inputs
                 }
-                .flatten() // turn list of lists into list
         }
         HYPHY(
             ch_hyphy_input,
