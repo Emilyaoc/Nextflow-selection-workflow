@@ -22,7 +22,7 @@ process PRANK {
     prank $args2 \\
         -d=${prefix}.best.fas \\
         -o=${prefix}
-    grep "^>" ${prefix}.best.fas | cut -f2- > ${prefix}.headers.txt
+    grep "^>" ${prefix}.best.fas | cut -c2- > ${prefix}.headers.txt
     """
 
     output:
