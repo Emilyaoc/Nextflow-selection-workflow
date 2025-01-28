@@ -22,9 +22,11 @@ process PRANK {
     prank $args2 \\
         -d=${prefix}.best.fas \\
         -o=${prefix}
+    grep "^>" ${prefix}.best.fas | cut -f2- > ${prefix}.headers.txt
     """
 
     output:
-    tuple val(prefix), path("*.best.fas"), emit: fasta_alignment
-    tuple val(prefix), path("*.phy")     , emit: paml_alignment
+    tuple val(prefix), path("*.best.fas"),    emit: fasta_alignment
+    tuple val(prefix), path("*.headers.txt"), emit: fasta_headers
+    tuple val(prefix), path("*.phy"),         emit: paml_alignment
 }

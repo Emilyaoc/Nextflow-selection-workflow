@@ -1,6 +1,7 @@
 #! /usr/bin/env nextflow
 include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons'
 include { PRANK                } from './modules/prank'
+include { APE                  } from './modules/ape'
 include { PAML                 } from './modules/paml'
 include { HYPHY                } from './modules/hyphy'
 include { JQ                   } from './modules/jq'
@@ -67,7 +68,8 @@ workflow SELECTION_ANALYSES {
         CODONPHYML( PRANK.out.paml_alignment )
         hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
-        hyphy_input = PRANK.out.fasta_alignment.combine( species_tree )
+        APE( PRANK.out.fasta_headers.combine( species_tree) )
+        hyphy_input = PRANK.out.fasta_alignment.combine( APE.out.tree )
     }
     // Hyphy branch-site selection tests
     if( params.hyphy_test && params.hyphy_test.values().every{ key -> key instanceof Map } ) {
