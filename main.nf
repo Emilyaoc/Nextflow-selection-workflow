@@ -69,7 +69,7 @@ workflow SELECTION_ANALYSES {
         hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
         APE( PRANK.out.fasta_headers.combine( species_tree) )
-        hyphy_input = PRANK.out.fasta_alignment.combine( APE.out.tree )
+        hyphy_input = PRANK.out.fasta_alignment.join( APE.out.tree )
     }
     // Hyphy branch-site selection tests
     if( params.hyphy_test && params.hyphy_test.values().every{ key -> key instanceof Map } ) {

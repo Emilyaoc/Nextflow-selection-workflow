@@ -15,8 +15,8 @@ process APE {
 
     seqnames=read.delim("$headers", header=FALSE)
     tree=ape::read.tree("$species_tree") # reads tree file into R as object
-    trimmed_tree=ape::keep.tip(tree, seqnames) # trims tree to only include species in alignment
-    ape::write.tree(trimmed_tree, “${species_tree.baseName}.trimmed.tree”) # save tree to file
+    trimmed_tree=ape::keep.tip(tree, seqnames\$V1) # trims tree to only include species in alignment
+    ape::write.tree(trimmed_tree,"${species_tree.baseName}.trimmed.tree") # save tree to file
     """
 
     output:
