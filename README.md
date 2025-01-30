@@ -23,18 +23,24 @@ project: 'snic20XX-YY-ZZ'
 # workflow parameters
 gene_sequences: /path/to/gene/sequences/*.fasta
 species_tree: /path/to/species.tree
-# species_labels: /path/to/species.tsv # Optional two column file of species and their labels
+species_labels: /path/to/species.tsv # Optional two column file of species and their labels
 run_codonphyml: false
 
 # Tool settings
-# prank_args: ''
 hyphy_test:
     absrel:
-        01: '' # use defaults
+        U-01: '--branches Leaves'
+        L-02: '--branches CB' # 'L-' prefix denotes species labels should be used
+    BUSTED-PH.bf:
+        U-11: '--branches CB --comparison PB --srv No'
 
 # output
 results: './results'
 ```
+
+Hyphy tests are supplied to workflow using a nested mapping. The top level key is the name
+of the test, and they key value pair underneath is the output label and settings to use. If
+the output label is prefixed with an `L-`, then the species labels are also supplied to Hyphy.
 
 Override `cpu`, `memory`, and `time` resources by creating a `nextflow.config` in your
 launch directory (where you run `nextflow run ...`), that looks like:
@@ -54,8 +60,7 @@ Mandatory:
 
 - `gene_sequences`: A set of gene sequences in fasta format to be sanitized and aligned.
 - `species_tree`: A species tree in Newick format to guide alignment.
-- **HYPHY** `hyphy_test`: The hyphy branch-site test to use.
-    Supported values are `absrel`, `busted`, and `fel`.
+- `hyphy_test`: The hyphy branch-site test to use. See parameter file above to see how tests and settings are supplied.
 
 Optional:
 
