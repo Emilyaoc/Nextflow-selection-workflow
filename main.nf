@@ -100,10 +100,7 @@ workflow SELECTION_ANALYSES {
                     } // Produce list of hyphy inputs
                 }
         }
-    HYPHY(
-        ch_hyphy_input,
-        params.species_labels ? file(params.species_labels, checkIfExists: true) : [],
-    )
+    HYPHY( ch_hyphy_input )
     // Hyphy JSON to TSV
     JQ(
         HYPHY.out.json,
