@@ -58,6 +58,18 @@ workflow SELECTION_ANALYSES {
     gene_sequences
 
     main:
+    // Check input
+    if( params.hyphy_test && params.hyphy_test.values().every{ entry -> entry instanceof Map } ) {
+        if( params.hyphy_test.keySet().any{ key -> key.startsWith('L-') && ! params.species_labels } ) {
+            error """
+                Error: Some inputs have been marked as using species labels ('L-' prefix),
+                    but `params.species_labels` has not been supplied.
+            """.stripIndent()
+        }
+    } else {
+        error "Error: Please supply one or more hyphy tests as described in the README!\n"
+    }
+
     // Phylogenetically-informed codon-based gene sequence alignment
     species_tree = Channel.fromPath(params.species_tree, checkIfExists: true)
     PRANK(
@@ -72,32 +84,29 @@ workflow SELECTION_ANALYSES {
         hyphy_input = PRANK.out.fasta_alignment.join( APE.out.tree )
     }
     // Hyphy branch-site selection tests
-    if( params.hyphy_test && params.hyphy_test.values().every{ key -> key instanceof Map } ) {
-        ch_hyphy_input = hyphy_input.flatMap{ id, path, tree -> 
+    ch_hyphy_input = hyphy_input.filter { params.hyphy_test }
+        .flatMap{ id, path, tree ->
             params.hyphy_test
                 .keySet() // Get test names
                 .collectMany { test ->
                     params.hyphy_test[test].collect { setting_id, settings ->
                         tuple( [ sample_id: id, setting_id: setting_id, settings: (settings?: '') ] , path, tree, test ) 
-                    } // Produce list of inputs
+                    } // Produce list of hyphy inputs
                 }
         }
-        HYPHY(
-            ch_hyphy_input,
-            params.species_labels ? file(params.species_labels, checkIfExists: true) : [],
-        )
-        // Hyphy JSON to TSV
-        JQ(
-            HYPHY.out.json,
-            file("${projectDir}/configs/hyphy_jq_filters.jq", checkIfExists: true),
-        )
-        JQ.out.tsv.collectFile(
-            name: 'allgenes.tsv',
-            skip: 1,
-            keepHeader: true,
-            storeDir: "${params.results}/04_HyPhy_selection_analysis",
-        )
-    } else {
-        error "Error: Please supply one or more hyphy tests as described in the README!\n"
-    }
+    HYPHY(
+        ch_hyphy_input,
+        params.species_labels ? file(params.species_labels, checkIfExists: true) : [],
+    )
+    // Hyphy JSON to TSV
+    JQ(
+        HYPHY.out.json,
+        file("${projectDir}/configs/hyphy_jq_filters.jq", checkIfExists: true)
+    )
+    JQ.out.tsv.collectFile(
+        name: 'allgenes.tsv',
+        skip: 1,
+        keepHeader: true,
+        storeDir: "${params.results}/04_HyPhy_selection_analysis",
+    )
 }
