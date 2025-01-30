@@ -35,7 +35,8 @@ process HYPHY {
     hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
         --alignment $fasta \\
         --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
-        $args
+        $args \\
+        'ENV="TOLERATE_NUMERICAL_ERRORS=1;"
     """
 
     output:
