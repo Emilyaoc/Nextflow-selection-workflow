@@ -90,7 +90,13 @@ workflow SELECTION_ANALYSES {
                 .keySet() // Get test names
                 .collectMany { test ->
                     params.hyphy_test[test].collect { setting_id, settings ->
-                        tuple( [ sample_id: id, setting_id: setting_id, settings: (settings?: '') ] , path, tree, test ) 
+                        tuple( 
+                            [ sample_id: id, setting_id: setting_id, settings: (settings?: '') ] , 
+                            path, 
+                            tree, 
+                            test,
+                            params.species_labels && setting_id.startsWith('L-') ? file(params.species_labels, checkIfExists: true) : [] 
+                        )
                     } // Produce list of hyphy inputs
                 }
         }

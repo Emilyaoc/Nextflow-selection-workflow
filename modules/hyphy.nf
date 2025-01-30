@@ -7,8 +7,13 @@ process HYPHY {
         "quay.io/biocontainers/hyphy:2.5.65--he91c24d_0" }"
 
     input:
-    tuple val(metadata), path(fasta), path(tree), val(test)
-    path species_labels  // Optional: option file to relabel species with
+    tuple (
+        val(metadata), 
+        path(fasta), 
+        path(tree), 
+        val(test),
+        path(species_labels)  // Optional: option file to relabel species with
+    )
 
     script:
     def args  = task.ext.args  ?: '' // command-line args for hyphy <test>
