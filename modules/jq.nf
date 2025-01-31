@@ -32,7 +32,7 @@ process JQ_COLLECT {
     tuple val(test), val(setting_id), val(tsvs)
 
     exec:
-    def outfile = file(task.workdir.resolve("${test}-${setting_id}.allgenes.tsv"))
+    def outfile = file(task.workDir.resolve("${test}-${setting_id}.allgenes.tsv"))
     outfile.text = tsvs.head().splitText( limit: 1, keepHeader: false ) // Note: in Nextflow 24.10.4 keepHeader boolean is inverted.
     tsvs.each { tsv_file ->
         outfile.append( tsv_file.splitText( keepHeader: true ) ) // Note: Same issue. keepHeader value needs to be inverted
