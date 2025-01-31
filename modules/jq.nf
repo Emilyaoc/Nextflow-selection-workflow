@@ -25,8 +25,9 @@ process JQ {
 // Native process to collect tsv files
 process JQ_COLLECT {
     //directives:
-    tag ""
+    tag "${test}-${setting_id}"
     // native processes run locally and don't use package managers
+    executor 'local'
 
     input:
     tuple val(test), val(setting_id), val(tsvs)
