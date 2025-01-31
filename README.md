@@ -17,7 +17,7 @@ Workflow parameters should be supplied using a `params.yml` file.
 
 `params.yml`:
 ```yml
-# SNIC Compute allocation (only for -profile uppmax/dardel/pdc_kth)
+# SNIC Compute allocation (only for -profile uppmax/dardel)
 project: 'snic20XX-YY-ZZ'
 
 # workflow parameters
@@ -32,14 +32,14 @@ hyphy_test:
         U-01: '--branches Leaves'
         L-02: '--branches CB' # 'L-' prefix denotes species labels should be used
     BUSTED-PH.bf:
-        U-11: '--branches CB --comparison PB --srv No'
+        L-11: '--branches CB --comparison PB --srv No'
 
 # output
 results: './results'
 ```
 
 Hyphy tests are supplied to workflow using a nested mapping. The top level key is the name
-of the test, and they key value pair underneath is the output label and settings to use. If
+of the test, and the key value pair underneath is the output label and settings to use. If
 the output label is prefixed with an `L-`, then the species labels are also supplied to Hyphy.
 
 Override `cpu`, `memory`, and `time` resources by creating a `nextflow.config` in your
@@ -79,16 +79,19 @@ All results are published to the path assigned to the workflow parameter `result
 - `01_Sanitized_Sequences/`: Sanitized gene sequences with trailing stop
 codons removed.
 - `02_Prank_alignment/`: Phylogenetically guided gene sequence alignments.
-- `03_HyPhy_selection_analysis/`: Hyphy selection analyses, and TSV of results.
+- `03_Codonphyml/`: Reconstructed phylogeny.
+- `04_HyPhy_selection_analysis/<test>-<id>`: Hyphy selection analyses, and TSV of results.
 - `pipeline_info/`: A folder containing workflow execution details (if -profile pipeline_info).
 
-### Customisation for Uppmax
+### Customisation for Uppmax and PDC-KTH
 
-A custom profile named `uppmax` is available to run this workflow specifically
-on UPPMAX clusters. The process `executor` is `slurm` so jobs are
+Custom profiles named `uppmax` and `dardel` are available to run this workflow specifically
+on UPPMAX and PDC-KTH clusters respectively. The process `executor` is `slurm` so jobs are
 submitted to the Slurm Queue Manager. All jobs submitted to slurm
 must have a project allocation. This is automatically added to the `clusterOptions`
-in the `uppmax` profile. All Uppmax clusters have node local disk space to do
+in the `uppmax` and `dardel` profiles. 
+
+All Uppmax clusters have node local disk space to do
 computations, and prevent heavy input/output over the network (which
 slows down the cluster for all).
 The path to this disk space is provided by the `$SNIC_TMP` variable, used by
@@ -98,13 +101,23 @@ executed within Singularity containers. See [nextflow.config](nextflow.config)
 for the profile specification.
 
 The profile is enabled using the `-profile` parameter to nextflow:
+
 ```bash
-nextflow run -profile uppmax <nextflow_script>
+nextflow run -profile uppmax main.nf
+```
+
+Similarly, the `dardel` profile also enables the use of Singularity. However
+Apptainer (formerly Singularity) must be made available using 
+`module load` before using the workflow.
+
+```bash
+module load PDC apptainer
+nextflow run -profile dardel main.nf
 ```
 
 ## Project structure
 
-The workflows in this folder manage the execution of your analyses
+The workflow in this folder manages the execution of your analyses
 from beginning to end.
 
 ```
@@ -112,7 +125,7 @@ Nextflow-selection-workflow/
  | - bin/                            Custom workflow scripts
  | - configs/                        Configuration files that govern workflow execution
  | - containers/                     Custom container definition files
- | - main.nf                         The primary analysis script
- | - nextflow.config                 General Nextflow configuration
- \ - params.config.TEMPLATE          A Template for parameter configuration
+ | - modules/                        Nextflow process definitions used in main.nf
+ | - main.nf                         The workflow definition script
+ \ - nextflow.config                 General Nextflow configuration
 ```
