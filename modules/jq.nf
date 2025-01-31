@@ -7,7 +7,7 @@ process JQ {
         "quay.io/biocontainers/jq:1.6" }"
 
     input:
-    path json
+    tuple val(metadata), path(json)
     path jq_filter
 
     script:

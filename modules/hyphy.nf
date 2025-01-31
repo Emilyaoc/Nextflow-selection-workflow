@@ -41,10 +41,10 @@ process HYPHY {
         --alignment $fasta \\
         --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
         $args \\
-        'ENV="TOLERATE_NUMERICAL_ERRORS=1;"
+        ENV="TOLERATE_NUMERICAL_ERRORS=1;"
     """
 
     output:
-    path "*.json"         , emit: json
+    tuple val(metadata), path("*.json")           , emit: json
     path "*.relabeled.nwk", emit: relabeled_newick, optional: true
 }
