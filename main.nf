@@ -1,11 +1,12 @@
 #! /usr/bin/env nextflow
 include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons'
 include { PRANK                } from './modules/prank'
+include { CODONPHYML           } from './modules/codonphyml'
 include { APE                  } from './modules/ape'
 include { PAML                 } from './modules/paml'
 include { HYPHY                } from './modules/hyphy'
 include { JQ                   } from './modules/jq'
-include { CODONPHYML           } from './modules/codonphyml'
+include { JQ_COLLECT           } from './modules/jq'
 
 // The main workflow
 workflow {
@@ -106,10 +107,11 @@ workflow SELECTION_ANALYSES {
         HYPHY.out.json,
         file("${projectDir}/configs/hyphy_jq_filters.jq", checkIfExists: true)
     )
-    JQ.out.tsv.collectFile(
-        name: 'allgenes.tsv',
-        skip: 1,
-        keepHeader: true,
-        storeDir: "${params.results}/04_HyPhy_selection_analysis",
-    )
+    JQ_COLLECT( JQ.out.tsv.groupTuple( by:[0,1] ) )
+    // JQ.out.tsv.collectFile(
+    //    name: 'allgenes.tsv',
+    //    skip: 1,
+    //    keepHeader: true,
+    //    storeDir: "${params.results}/04_HyPhy_selection_analysis",
+    // )
 }

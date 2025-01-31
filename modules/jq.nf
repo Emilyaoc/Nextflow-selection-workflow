@@ -19,5 +19,25 @@ process JQ {
     """
 
     output:
-    path "*.tsv", emit: tsv
+    tuple val(metadata.test), val(metadata.setting_id), path("*.tsv"), emit: tsv
+}
+
+// Native process to collect tsv files
+process JQ_COLLECT {
+    //directives:
+    tag ""
+    // native processes run locally and don't use package managers
+
+    input:
+    tuple val(test), val(setting_id), val(tsvs)
+
+    exec:
+    def outfile = file(task.workdir.resolve("${test}-${setting_id}.allgenes.tsv"))
+    outfile.text = tsvs.head().splitText( limit: 1, keepHeader: false ) // Note: in Nextflow 24.10.4 keepHeader boolean is inverted.
+    tsvs.each { tsv_file ->
+        outfile.append( tsv_file.splitText( keepHeader: true ) ) // Note: Same issue. keepHeader value needs to be inverted
+    }
+
+    output:
+    path "*.allgenes.tsv"
 }
