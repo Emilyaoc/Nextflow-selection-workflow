@@ -95,7 +95,6 @@ workflow SELECTION_ANALYSES {
                             [ sample_id: id, setting_id: setting_id, settings: (settings?: ''), test: test ], 
                             path,
                             tree,
-                            test,
                             params.species_labels && setting_id.startsWith('L-') ? file(params.species_labels, checkIfExists: true) : []
                         )
                     } // Produce list of hyphy inputs

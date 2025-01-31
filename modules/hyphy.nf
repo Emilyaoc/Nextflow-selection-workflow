@@ -10,8 +10,7 @@ process HYPHY {
     tuple (
         val(metadata), 
         path(fasta), 
-        path(tree), 
-        val(test),
+        path(tree),
         path(species_labels)  // Optional: option file to relabel species with
     )
 
@@ -37,7 +36,7 @@ process HYPHY {
     fi
 
     # Hyphy test: If ends with .bf, will look for script in bin folder
-    hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
+    hyphy ${metadata.test.endsWith('.bf') ? "$projectDir/bin/${metadata.test}" : metadata.test} \\
         --alignment $fasta \\
         --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
         $args \\
