@@ -27,9 +27,9 @@ workflow VALIDATE_SEQUENCES {
     """
     )
 
-    // Check a project allocation is given for running on Uppmax clusters.
-    if (workflow.profile.tokenize(',').intersect([ 'uppmax, dardel' ]) && !params.project) {
-        error "Please provide a SNIC project number ( --project )!\n"
+    // Check a project allocation is given for running on PDC clusters.
+    if (workflow.profile.tokenize(',').intersect([ 'dardel' ]) && !params.project) {
+        error "Please provide a NAISS project number ( --project )!\n"
     }
 
     Channel

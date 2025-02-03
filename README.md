@@ -17,8 +17,8 @@ Workflow parameters should be supplied using a `params.yml` file.
 
 `params.yml`:
 ```yml
-# SNIC Compute allocation (only for -profile uppmax/dardel)
-project: 'snic20XX-YY-ZZ'
+# NAISS Compute allocation (only for -profile dardel)
+project: 'naiss20XX-YY-ZZ'
 
 # workflow parameters
 gene_sequences: /path/to/gene/sequences/*.fasta
@@ -67,48 +67,32 @@ Optional:
 - `species_labels`: A two column file of species and their labels.
 - `run_codonphyml`: If true, run codonphyml to make a gene tree for hyphy (default: false) 
 - `results`: The publishing path for results (default: `results`).
-- `publish_mode`: (values: `'symlink'` (default), `'copy'`) The file
+- `publish_mode`: (values: `'symlink'`, `'copy'` (default)) The file
 publishing method from the intermediate results folders
-(see [Table of publish modes](https://www.nextflow.io/docs/latest/process.html#publishdir)).
+(see [Table of publish modes](https://www.nextflow.io/docs/latest/reference/process.html#publishdir)).
 
 ### Workflow outputs
 
 All results are published to the path assigned to the workflow parameter `results`.
 
 - `00_Problematic_Sequences`: Sequences that failed sanitation. Intermediate stop codons were found.
-- `01_Sanitized_Sequences/`: Sanitized gene sequences with trailing stop
-codons removed.
+- `01_Sanitized_Sequences/`: Sanitized gene sequences with trailing stop codons removed.
 - `02_Prank_alignment/`: Phylogenetically guided gene sequence alignments.
 - `03_Codonphyml/`: Reconstructed phylogeny.
 - `04_HyPhy_selection_analysis/<test>-<id>`: Hyphy selection analyses, and TSV of results.
 - `pipeline_info/`: A folder containing workflow execution details (if -profile pipeline_info).
 
-### Customisation for Uppmax and PDC-KTH
+### Customisation for PDC-KTH
 
-Custom profiles named `uppmax` and `dardel` are available to run this workflow specifically
-on UPPMAX and PDC-KTH clusters respectively. The process `executor` is `slurm` so jobs are
-submitted to the Slurm Queue Manager. All jobs submitted to slurm
-must have a project allocation. This is automatically added to the `clusterOptions`
-in the `uppmax` and `dardel` profiles. 
-
-All Uppmax clusters have node local disk space to do
-computations, and prevent heavy input/output over the network (which
-slows down the cluster for all).
-The path to this disk space is provided by the `$SNIC_TMP` variable, used by
-the `process.scratch` directive in the `uppmax` profile. Lastly
-the profile enables the use of Singularity so that all processes must be
-executed within Singularity containers. See [nextflow.config](nextflow.config)
-for the profile specification.
-
-The profile is enabled using the `-profile` parameter to nextflow:
-
-```bash
-nextflow run -profile uppmax main.nf
-```
-
-Similarly, the `dardel` profile also enables the use of Singularity. However
-Apptainer (formerly Singularity) must be made available using 
-`module load` before using the workflow.
+Custom profiles named `dardel` and `dardel_local` are available to run this workflow specifically
+on PDC-KTH clusters. The `dardel` profile utilizes the [nf-core pdc-kth profile](https://github.com/nf-core/configs/blob/master/conf/pdc_kth.config) 
+which enables using the `slurm` executor so jobs are submitted to the Slurm Queue Manager. All jobs 
+submitted to slurm must be associated to a NAISS project which is supplied using the `--project` 
+workflow parameter. All jobs are executed within Apptainer containers (formerly Singularity). 
+Remember to use `module load PDC apptainer` in order to use Apptainer with the workflow. Similarly, 
+the `dardel_local` profile also uses Singularity containers, but executes everything locally. Follow
+the instructions on [PDC_KTH - Interactive running](https://support.pdc.kth.se/doc/support-docs/run_jobs/run_interactively/) 
+for running a job locally.
 
 ```bash
 module load PDC apptainer
