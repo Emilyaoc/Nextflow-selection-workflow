@@ -1,28 +1,22 @@
-params.options = [:]
-
 process HYPHY {
-
+    // directives:
     tag "${fasta.simpleName}"
-
-    conda (params.enable_conda ? "bioconda::hyphy:2.5.31" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/hyphy:2.5.31--h48c199c_0"
-    } else {
-        container "quay.io/biocontainers/hyphy:2.5.31--h48c199c_0"
-    }
+    conda "bioconda::hyphy:2.5.65"
+    container "${workflow.containerEngine in [ 'singularity', 'apptainer' ] ?
+        "https://depot.galaxyproject.org/singularity/hyphy:2.5.65--he91c24d_0" :
+        "quay.io/biocontainers/hyphy:2.5.65--he91c24d_0" }"
 
     input:
-    tuple val(id), path(fasta), path(tree)
-    val test                               // Hyphy test: If ends with .bf, will look for script in bin folder
-    path species_labels                    // Optional: option file to relabel species with
-
-    output:
-    path "*.json"         , emit: json
-    path "*.relabeled.nwk", emit: relabeled_newick, optional: true
+    tuple (
+        val(metadata), 
+        path(fasta), 
+        path(tree),
+        path(species_labels)  // Optional: option file to relabel species with
+    )
 
     script:
-    def args = task.ext.args ?: ''    // optional command-line args for hyphy <test>
-    def args2 = task.ext.args2 ?: ''  // optional command-line args for hyphy label-tree
+    def args  = task.ext.args  ?: '' // command-line args for hyphy <test>
+    def args2 = task.ext.args2 ?: '' // optional command-line args for hyphy label-tree
     """
     if [ -f "$species_labels" ]; then
         # $species_labels is a two column file
@@ -41,10 +35,15 @@ process HYPHY {
         done 
     fi
 
-    hyphy ${test.endsWith('.bf') ? "$projectDir/bin/$test" : test} \\
+    # Hyphy test: If ends with .bf, will look for script in bin folder
+    hyphy ${metadata.test.endsWith('.bf') ? "$projectDir/bin/${metadata.test}" : metadata.test} \\
         --alignment $fasta \\
         --tree ${species_labels ? "${tree.baseName}.relabeled.nwk" : tree} \\
-        $args
+        $args \\
+        ENV="TOLERATE_NUMERICAL_ERRORS=1;"
     """
 
+    output:
+    tuple val(metadata), path("*.json")           , emit: json
+    path "*.relabeled.nwk", emit: relabeled_newick, optional: true
 }

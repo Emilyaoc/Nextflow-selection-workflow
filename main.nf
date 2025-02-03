@@ -1,35 +1,15 @@
 #! /usr/bin/env nextflow
-
-// Enable DSL2 syntax for Nextflow
-nextflow.enable.dsl = 2
-
-// Default workflow parameters are provided in the file 'nextflow.config'.
-
-// Print Workflow header
-log.info("""
-NBIS support 5875
-
- Measuring selection in avian immune genes
- ===================================
-
-""")
-
-// Check a project allocation is given for running on Uppmax clusters.
-if(workflow.profile == "uppmax" && !params.project){
-    exit 1, "Please provide a SNIC project number ( --project )!\n"
-}
-
 include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons'
 include { PRANK                } from './modules/prank'
+include { CODONPHYML           } from './modules/codonphyml'
+include { APE                  } from './modules/ape'
 include { PAML                 } from './modules/paml'
 include { HYPHY                } from './modules/hyphy'
 include { JQ                   } from './modules/jq'
-include { CODONPHYML           } from './modules/codonphyml'
+include { JQ_COLLECT           } from './modules/jq'
 
 // The main workflow
 workflow {
-
-    main:
     VALIDATE_SEQUENCES()
     SELECTION_ANALYSES(
         VALIDATE_SEQUENCES.out.sequences
@@ -37,28 +17,37 @@ workflow {
 }
 
 workflow VALIDATE_SEQUENCES {
-
     main:
-    // Get data (from params.config if available)
-    Channel.fromPath(params.gene_sequences)
-        .ifEmpty { exit 1, "Please provide a gene sequence file (--gene_sequences ${params.gene_sequences})!\n" }
+    log.info(
+        """
+    NBIS support 5875
+
+    Measuring selection in avian immune genes
+    ===================================
+
+    """
+    )
+
+    // Check a project allocation is given for running on Uppmax clusters.
+    if (workflow.profile.tokenize(',').intersect([ 'uppmax, dardel' ]) && !params.project) {
+        error "Please provide a SNIC project number ( --project )!\n"
+    }
+
+    Channel
+        .fromPath( params.gene_sequences, checkIfExists: true )
         .set { gene_seq_ch }
 
     // Check sequences for stop codons
     // and santize sequences if possible
-    SANITIZE_STOP_CODONS ( gene_seq_ch )
+    SANITIZE_STOP_CODONS(gene_seq_ch)
     SANITIZE_STOP_CODONS.out.fasta
-        .filter { fasta -> fasta.toString().endsWith("_nostop.fasta") }
-        /* .branch { fasta ->
-            invalid: fasta.toString().endsWith("_stops.fasta")
-            valid: fasta.toString().endsWith("_nostop.fasta")
-        } */
+        .filter { fasta -> fasta.name.endsWith("_nostop.fasta") }
         .set { gene_sequences }
-    SANITIZE_STOP_CODONS.out.tsv.collectFile (
+    SANITIZE_STOP_CODONS.out.tsv.collectFile(
         name: 'failed_sequences.tsv',
         skip: 1,
         keepHeader: true,
-        storeDir: "${params.results}/00_Problematic_Sequences"
+        storeDir: "${params.results}/00_Problematic_Sequences",
     )
 
     emit:
@@ -66,41 +55,62 @@ workflow VALIDATE_SEQUENCES {
 }
 
 workflow SELECTION_ANALYSES {
-
     take:
     gene_sequences
 
     main:
+    // Check input
+    if( params.hyphy_test && params.hyphy_test.values().every{ entry -> entry instanceof Map } ) {
+        if( params.hyphy_test.keySet().any{ key -> key.startsWith('L-') && ! params.species_labels } ) {
+            error """
+                Error: Some inputs have been marked as using species labels ('L-' prefix),
+                    but `params.species_labels` has not been supplied.
+            """.stripIndent()
+        }
+    } else {
+        error "Error: Please supply one or more hyphy tests as described in the README!\n"
+    }
+
     // Phylogenetically-informed codon-based gene sequence alignment
-    species_tree = file( params.species_tree, checkIfExists: true )
-    PRANK (
+    species_tree = Channel.fromPath(params.species_tree, checkIfExists: true)
+    PRANK(
         gene_sequences,
-        species_tree
+        species_tree.collect(),
     )
-    if( params.run_codonphyml ) {
-        CODONPHYML( 
-            PRANK.out.paml_alignment    
-        )
+    if (params.run_codonphyml) {
+        CODONPHYML( PRANK.out.paml_alignment )
         hyphy_input = PRANK.out.fasta_alignment.join( CODONPHYML.out.codonphyml_tree )
     } else {
-        hyphy_input = PRANK.out.fasta_alignment.combine( Channel.value( species_tree ) )
+        APE( PRANK.out.fasta_headers.combine( species_tree) )
+        hyphy_input = PRANK.out.fasta_alignment.join( APE.out.tree )
     }
     // Hyphy branch-site selection tests
-    HYPHY (
-        hyphy_input,
-        params.hyphy_test,
-        params.species_labels ? file( params.species_labels, checkIfExists: true ) : [] // Supply species labels file if defined, otherwise leave empty
-    )
+    ch_hyphy_input = hyphy_input.filter { params.hyphy_test }
+        .flatMap{ id, path, tree ->
+            params.hyphy_test
+                .keySet() // Get test names
+                .collectMany { test ->
+                    params.hyphy_test[test].collect { setting_id, settings ->
+                        tuple(
+                            [ sample_id: id, setting_id: setting_id, settings: (settings?: ''), test: test ], 
+                            path,
+                            tree,
+                            params.species_labels && setting_id.startsWith('L-') ? file(params.species_labels, checkIfExists: true) : []
+                        )
+                    } // Produce list of hyphy inputs
+                }
+        }
+    HYPHY( ch_hyphy_input )
     // Hyphy JSON to TSV
-    JQ (
+    JQ(
         HYPHY.out.json,
-        file( "$projectDir/configs/hyphy_jq_filters.jq", checkIfExists:true )
+        file("${projectDir}/configs/hyphy_jq_filters.jq", checkIfExists: true)
     )
-    JQ.out.tsv.collectFile(
-        name:'allgenes.tsv',
-        skip:1,
-        keepHeader:true,
-        storeDir:"${params.results}/04_HyPhy_selection_analysis"
-    )
-
+    JQ_COLLECT( JQ.out.tsv.groupTuple( by:[0,1] ) )
+    // JQ.out.tsv.collectFile(
+    //    name: 'allgenes.tsv',
+    //    skip: 1,
+    //    keepHeader: true,
+    //    storeDir: "${params.results}/04_HyPhy_selection_analysis",
+    // )
 }
