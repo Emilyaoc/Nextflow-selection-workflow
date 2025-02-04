@@ -3,7 +3,6 @@ include { SANITIZE_STOP_CODONS } from './modules/sanitize_stop_codons'
 include { PRANK                } from './modules/prank'
 include { CODONPHYML           } from './modules/codonphyml'
 include { APE                  } from './modules/ape'
-include { PAML                 } from './modules/paml'
 include { HYPHY                } from './modules/hyphy'
 include { JQ                   } from './modules/jq'
 include { JQ_COLLECT           } from './modules/jq'
@@ -28,9 +27,9 @@ workflow VALIDATE_SEQUENCES {
     """
     )
 
-    // Check a project allocation is given for running on Uppmax clusters.
-    if (workflow.profile.tokenize(',').intersect([ 'uppmax, dardel' ]) && !params.project) {
-        error "Please provide a SNIC project number ( --project )!\n"
+    // Check a project allocation is given for running on PDC clusters.
+    if (workflow.profile.tokenize(',').intersect([ 'dardel' ]) && !params.project) {
+        error "Please provide a NAISS project number ( --project )!\n"
     }
 
     Channel
