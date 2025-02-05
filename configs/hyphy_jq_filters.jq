@@ -225,6 +225,8 @@ elif ."analysis"."info" | contains("BUSTED-PH") then
         "Sequences",
         "Sites",
         "Partition count",
+        "Unconstrained AICc",
+        "Unconstrained LogL",
         "Background Omega W1",
         "Background Proportion W1",
         "Background Omega W2",
@@ -260,6 +262,12 @@ elif ."analysis"."info" | contains("BUSTED-PH") then
             ."number of sequences",                                     # Number of sequences
             ."number of sites",                                         # Number of sites
             ."partition count"                                           # Partition count
+        ]
+    ) +
+    ( ."fits"."Unconstrained model" |
+        [
+            ."AIC-c",                            # Unconstrained model AICc
+            ."Log Likelihood"                    # Unconstrained model LogL
         ]
     ) +
     ( ."fits"."Unconstrained model"."Rate Distributions"."Background". "0" | 
