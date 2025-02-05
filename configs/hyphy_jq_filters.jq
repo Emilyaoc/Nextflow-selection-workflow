@@ -51,10 +51,15 @@ elif ."analysis"."info" | contains("aBSREL") then
     # Print Header
     [
         "Testname",
+        "SRV",
+        "Multiple hits",
         "Filename",
         "Sequences",
         "Sites",
         "Partition count",
+        "Full adaptive AICc",
+        "Full adaptive LogL",
+        "Baseline MG94xREV AICc",
         "Positive test results",
         "Tested",
         "Spp/Node",
@@ -78,7 +83,18 @@ elif ."analysis"."info" | contains("aBSREL") then
         [
             ."info" | capture("(?<test>[a-zA-Z]+)" ).test  # Name of HyPhy test
         ]
-    ) +    
+    ) +  
+    (."analysis"."settings" |
+        [
+            ."srv"                                      # SRV
+        ]
+    ) + 
+        (."analysis"."settings" |
+        [
+            ."multiple-hit"                         # Multiple hits
+        ]
+
+    ) +  
     (  ."input" |
             [
                 ."file name" | capture("(?<fname>[0-9a-zA-Z_.]+)$").fname  # Name of file
@@ -90,7 +106,19 @@ elif ."analysis"."info" | contains("aBSREL") then
             ."number of sites",                    # Number of sites
             ."partition count"                     # Partition count
         ]
-    ) +                         
+    ) + 
+     ( ."fits"."Full adaptive model" |
+        [
+            ."AIC-c",                            # Full adaptive AICc
+            ."Log Likelihood"                    # Full adaptive LogL
+        ]
+    ) +
+    ( ."fits"."Baseline MG94xREV" |
+        [
+            ."AIC-c"                            # Baseline MG94xREV AICc
+
+        ]
+    ) +                        
     ( ."test results" |
         [
             ."positive test results",               # Number of significant results
@@ -293,10 +321,16 @@ elif ."analysis"."info" | contains("BUSTED") then
     # Print Header
     [
         "Testname",
+        "SRV",
+        "Multiple hits",
         "Filename",
         "Sequences",
         "Sites",
         "Partition count",
+        "Unconstrained model AICc",
+        "Unconstrained model LogL",
+        "Constrained model AICc",
+        "Constrained model LogL",
         "Omega W1",
         "Proportion W1",
         "Omega W2",
@@ -312,12 +346,36 @@ elif ."analysis"."info" | contains("BUSTED") then
             ."info" | capture("(?<test>[a-zA-Z]+)" ).test   # Name of HyPhy test
         ]
     ) +
+     (."analysis"."settings" |
+        [
+            ."srv"                                      # SRV
+        ]
+    ) + 
+        (."analysis"."settings" |
+        [
+            ."multiple-hit"                         # Multiple hits
+        ]
+
+    ) +
     ( ."input" |
         [
             ."file name",                          # Name of file
             ."number of sequences",                # Number of sequences
             ."number of sites",                    # Number of sites
             ."partition count"                     # Partition count
+        ]
+    ) +
+    ( ."fits"."Unconstrained model" |
+        [
+            ."AIC-c",                            # Unconstrained model AICc
+            ."Log Likelihood"                    # Unconstrained model LogL
+        ]
+    ) +
+    ( ."fits"."Constrained model" |
+        [
+            ."AIC-c",                            # Constrained model AICc
+            ."Log Likelihood"                    # Constrained model LogL
+
         ]
     ) +
     ( . "fits" . "Unconstrained model" . "Rate Distributions" . "Test" . "0" | 
