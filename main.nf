@@ -72,8 +72,12 @@ workflow SELECTION_ANALYSES {
 
     // Phylogenetically-informed codon-based gene sequence alignment
     species_tree = Channel.fromPath(params.species_tree, checkIfExists: true)
+    gene_sequences.filter{ fasta -> fasta.countFasta() <= 2 }
+        .collectFile( storeDir: "${params.results}/02_Prank_alignment/removed_sequences/" ) { filename ->
+            [ "too_few_sequences.txt", "$filename\n" ]
+        }
     PRANK(
-        gene_sequences,
+        gene_sequences.filter{ fasta -> fasta.countFasta() > 2 },
         species_tree.collect(),
     )
     if (params.run_codonphyml) {
