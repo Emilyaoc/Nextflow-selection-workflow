@@ -6,6 +6,8 @@ if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
         "Filename",
         "Sequences",
         "Sites",
+        "Null AICc",
+        "Alternative AICc",
         "LRT",
         "P-value",
         "K",
@@ -29,7 +31,17 @@ if any( (."branch attributes"."attributes" | keys[] ) ; contains("RELAX") ) then
                 ."number of sequences",                                                 # Number of sequences
                 ."number of sites"                                                      # Number of sites
             ]
-    ) +                                                 
+    ) +    
+    (   ."fits"."RELAX null" |
+        [
+            ."AIC-c"                            # Null model AICc
+        ]
+    ) +        
+    (   ."fits"."RELAX alternative" |
+        [
+            ."AIC-c"                            # Alternative model AICc
+        ]
+    ) +                                           
     ( ."test results" |
         [
             ."LRT",                                            # Results of LRT
